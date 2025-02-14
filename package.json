@@ -1,0 +1,37 @@
+{
+  "name": "chatbot-pemesanan-online",
+  "version": "1.0.0",
+  "description": "chatbot pemesanan online untuk tugas akhir supaya lulus",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Rrens/TUGAS-AKHIR-CHATBOT-PEMESANAN-ONLINE.git"
+  },
+  "keywords": [
+    "chatbot",
+    "pemesanan",
+    "online"
+  ],
+  "author": "rrens",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Rrens/TUGAS-AKHIR-CHATBOT-PEMESANAN-ONLINE/issues"
+  },
+  "homepage": "https://github.com/Rrens/TUGAS-AKHIR-CHATBOT-PEMESANAN-ONLINE#readme",
+  "dependencies": {
+    "axios": "^1.5.0",
+    "dotenv": "^16.3.1",
+    "express": "^4.21.2",
+    "nodemon": "^3.0.1",
+    "punycode": "^2.3.1",
+    "puppeteer": "^24.2.0",
+    "puppeteer-core": "^24.2.0",
+    "qrcode-terminal": "^0.12.0",
+    "uuid": "^11.0.5",
+    "whatsapp-web.js": "^1.26.0"
+  }
+}

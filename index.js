@@ -3,12 +3,24 @@ const { Client, LocalAuth } = require('whatsapp-web.js');
 const session = require('./features/session');
 const { handleMessages } = require('./features/handle_messages');
 const express = require('express');
+const axios = require('axios');
 
 const app = express();
 const port = 3000;
 
 // Middleware untuk parsing JSON
 app.use(express.json());
+
+// Post data to an API
+async function postData(url, body) {
+    try {
+        const response = await axios.post(url, body);
+        return response.data;
+    } catch (error) {
+        console.error("Error posting data:", error);
+        return null;
+    }
+}
 
 const client = new Client({
     authStrategy: new LocalAuth()
@@ -98,6 +110,37 @@ client.on('message', async msg => {
         return
     }
 
+    const claim_template = "Halo, saya ingin klaim akun dengan kode transaksi"
+    const get_uuid = text.match(/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/);
+
+    if(text.includes(claim_template) && get_uuid){
+        const claim_code = get_uuid[0]
+
+        const data_cred = await postData("http://127.0.0.1:3000/api/transactions/claim_code", {transaction_code:claim_code})
+
+        if(data_cred.message){
+            chat.sendMessage(`data tidak ditemukan dengan kode tersebut.`)
+            return
+        }
+
+        const email = data_cred.email
+        const password = data_cred.password
+        const profile = data_cred.profile
+        const pin = data_cred.pin
+
+        const pesan = `Terima kasih telah bertransaksi melalui Golden Digital. Berikut data credential anda:
+        - email : ${email}
+        - password : ${password}
+        - profile : ${profile}
+        - pin : ${pin}
+        `
+
+
+
+        chat.sendMessage(pesan)
+        return
+    }
+
     const chat_ts = msg._data.t * 1000
     const currentTimestamp = Date.now(); // Timestamp saat ini
     // Hitung selisih waktu dalam milidetik
@@ -146,7 +189,7 @@ client.on('message', async msg => {
         }
     }
 
-    if(phoneNumber === "6282245083753"){
+    if(phoneNumber === "6285183200149"){
         if (!onConv.has(phoneNumber)){
             onConv.add(phoneNumber)
             await handleMessages(msg)

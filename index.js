@@ -106,7 +106,7 @@ client.on('message', async msg => {
 
     let phoneNumber = cmd[0];
 
-    if(phoneNumber === "status"){
+    if(phoneNumber === "status" | msg._data.type != "chat"){
         return
     }
 
@@ -116,8 +116,8 @@ client.on('message', async msg => {
     if(text.includes(claim_template) && get_uuid){
         const claim_code = get_uuid[0]
 
-        const data_cred = await postData("http://127.0.0.1:3000/api/transactions/claim_code", {transaction_code:claim_code})
-
+        const data_cred = await postData("http://127.0.0.1:8000/api/transactions/claim_code", {transaction_code:claim_code})
+        console.log(data_cred);
         if(data_cred.message){
             chat.sendMessage(`data tidak ditemukan dengan kode tersebut.`)
             return
@@ -127,17 +127,18 @@ client.on('message', async msg => {
         const password = data_cred.password
         const profile = data_cred.profile
         const pin = data_cred.pin
+        const template = data_cred.template
 
-        const pesan = `Terima kasih telah bertransaksi melalui Golden Digital. Berikut data credential anda:
-        - email : ${email}
-        - password : ${password}
-        - profile : ${profile}
-        - pin : ${pin}
-        `
+        const pesan = `Terima kasih telah bertransaksi melalui Golden Digital. Berikut data credential anda:\n- email : ${email}\n- password : ${password}\n- profile : ${profile}\n- pin : ${pin}\n\n${template}`
 
 
 
-        chat.sendMessage(pesan)
+        await chat.sendMessage(pesan)
+        await chat.sendMessage("Baik Kak, apakah ada yang dapat saya bantu lagi?\n1. Berbicara dengan Customer Service\n2. Kembali ke Menu Utama\n3. Tidak terima kasih");
+        session[phoneNumber].question_id = "99"
+        session[phoneNumber].question = "Baik Kak, apakah ada yang dapat saya bantu lagi?\n1. Berbicara dengan Customer Service\n2. Kembali ke Menu Utama\n3. Tidak terima kasih"
+        session[phoneNumber].answer_option = "option"
+        session[phoneNumber].option = ["2"]
         return
     }
 
@@ -176,12 +177,7 @@ client.on('message', async msg => {
         }else if(session[phoneNumber].question_id === "99" && text === "3"){
             delete session[phoneNumber]
 
-            const textEnd = `Terima kasih telah menggunakan layanan kami, ditunggu orderan
-            lainnya:)
-
-            Kami menyediakan berbagai akun premium lainnya dan terdapat banyak promo menarik yang dapat diakses pada: https://golden-digital.vercel.app/
-
-            Salam Hangat, Golden Digital:`
+            const textEnd = `Terima kasih telah menggunakan layanan kami, ditunggu orderan lainnya:)\n\nKami menyediakan berbagai akun premium lainnya dan terdapat banyak promo menarik yang dapat diakses pada: https://golden-digital.vercel.app/\n\nSalam Hangat, Golden Digital:`
 
             chat.sendMessage(textEnd)
 
@@ -189,7 +185,7 @@ client.on('message', async msg => {
         }
     }
 
-    if(phoneNumber === "6285183200149"){
+    if(phoneNumber === "6282245083753"){
         if (!onConv.has(phoneNumber)){
             onConv.add(phoneNumber)
             await handleMessages(msg)

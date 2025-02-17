@@ -84,7 +84,7 @@ function redeemShopee(code) {
 
 // Main bot control function
 async function botControl(body) {
-    let { question_id, answer, number, variant, produk_id, produk_name, name, price, produk_code } = body;
+    let { question_id, answer, number, variant, produk_id, produk_name, name, price, produk_code,upgrade } = body;
 
     let response = {
         question_id: "",
@@ -95,6 +95,7 @@ async function botControl(body) {
         media_type: "",
         media_path: "",
         name,
+        upgrade,
         variant,
         produk_id,
         produk_name,
@@ -125,20 +126,22 @@ async function botControl(body) {
         next_question_id = "1";
     } else if (currentAnswerList.includes(answer) && /^\d+$/.test(answer)) {
         next_question_id = flowBot[question_id][answer];
-    } else if (currentAnswerList.includes("nomor")) {
-        // if (isValidEmail(answer)) {
-            const upgraded = await postData("https://devgoldendigital.my.id/api/transactions/upgrade", {"wa":answer});
-            if (upgraded.id) {
+    } else if (currentAnswerList.includes("email")) {
+        if (isValidEmail(answer)) {
+            const upgraded = await postData("http://127.0.0.1:8000/api/transactions/upgrade", {"email":answer});
+            if (upgraded.message) {
                 // Object.assign(response, upgraded.data);
-                response.produk_code = upgraded.kode_toko
+                response.message = "Email yang anda masukan tidak ditemukan, mohon masukan email yang benar";
+                next_question_id = flowBot[question_id]["email"]["salah"];
             } else {
-                response.message = upgraded;
+                response.upgrade = answer;
+                next_question_id = flowBot[question_id]["email"]["benar"];
             }
-            next_question_id = flowBot[question_id]["email"][upgraded.status];
-        // } else {
-        //     response.message = { status: "salah", message: "Mohon masukan format email yang benar" };
-        //     next_question_id = flowBot[question_id]["email"]["salah"];
-        // }
+        } else {
+            response.message = "Mohon masukan format email yang benar";
+            next_question_id = flowBot[question_id]["email"]["salah"];
+            console.log("next_question_id", next_question_id);
+        }
     } else if (currentAnswerList.includes("variant")) {
         const getVariant = await fetchData("https://devgoldendigital.my.id/api/variances");
         variant_name = getVariant.variance.find(x => x.id.toString() === answer)?.variance_name || "";
@@ -155,17 +158,47 @@ async function botControl(body) {
             response.price = produk?.harga || "";
             next_question_id = flowBot[question_id]["produk"];
         }
+    }else if (currentAnswerList.includes("upgrade")) {
+        const upgraded = await postData("http://127.0.0.1:8000/api/transactions/upgrade", {"email":response.upgrade});
+        if (upgraded.products) {
+            
+            const produk = upgraded.products[upgraded.current_product.variance_name].find(x => x.id_produk.toString() === answer);
+            response.name = upgraded.current_product.nama_customer;
+            response.produk_id = answer;
+            response.produk_name = produk?.detail_produk || "";
+            response.produk_code = produk?.kode_produk || "";
+            response.price = produk?.harga_upgrade || "";
+            next_question_id = flowBot[question_id]["upgrade"];
+        }
     } else if (currentAnswerList.includes("any")) {
         if (question_id === "4") response.name = answer;
-        if (question_id === "10") response.message = redeemShopee(answer);
+        // if (question_id === "10") response.message = redeemShopee(answer);
 
         if(question_id === "10"){
-            if(response.message.message === "benar"){
-
-                next_question_id = "99"
-            }else{
+            const data_cred = await postData("http://127.0.0.1:8000/api/transactions/claim_code", {transaction_code:answer})
+            console.log(data_cred);
+            if(data_cred.message){
                 next_question_id = flowBot[question_id]["any"];
+                response.message = "Format yang Anda kirim salah. Mohon kirim kembali format pemesanan dengan benar."
+            }else{
+                const email = data_cred.email
+                const password = data_cred.password
+                const profile = data_cred.profile
+                const pin = data_cred.pin
+                const template = data_cred.template
+
+                const pesan = `Terima kasih telah bertransaksi melalui Golden Digital. Berikut data credential anda:\n- email : ${email}\n- password : ${password}\n- profile : ${profile}\n- pin : ${pin}\n\n${template}`
+                
+                next_question_id = "99"
+                response.message = pesan
             }
+
+            // if(response.message.message === "benar"){
+
+            //     next_question_id = "99"
+            // }else{
+            //     next_question_id = flowBot[question_id]["any"];
+            // }
         }else{
 
             next_question_id = flowBot[question_id]["any"];
@@ -215,6 +248,28 @@ async function botControl(body) {
         response.question = questionList[next_question_id]
             .replace("{variant}", variant_name)
             .replace("{produk}", item_option)
+            .replace("\\n", "\n");
+        response.answer_option = "option";
+        response.option = [...produkList.map(x => x.id_produk.toString()), "0"];
+    }else if (nextAnswerList.includes("upgrade")) {
+        const getProduk = await postData("http://127.0.0.1:8000/api/transactions/upgrade", {"email":answer});
+        // console.log("https://devgoldendigital.my.id/api/get_detail_products/variance/"+response.variant);
+        console.log(getProduk);
+        let item_option=""
+        let produkList=[]
+        if(getProduk.products && Object.keys(getProduk.products).length > 0){
+            
+            produkList = getProduk.products[getProduk.current_product.variance_name]//.filter(x => x.detail_produk.includes(variant_name));
+            // console.log(getProduk.products);
+            // console.log(response.variant);
+            // console.log(getProduk.products[response.variant]);
+            item_option = produkList.map(x => `${x.id_produk}. ${x.detail_produk} Rp ${x.harga} - Rp ${getProduk.current_product.harga} = Rp ${x.harga_upgrade}`).join("\n");
+        }
+
+        response.question_id = next_question_id;
+        response.question = questionList[next_question_id]
+            .replace("{current_product}", getProduk.current_product.detail)
+            .replace("{list_product}", item_option)
             .replace("\\n", "\n");
         response.answer_option = "option";
         response.option = [...produkList.map(x => x.id_produk.toString()), "0"];

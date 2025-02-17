@@ -86,7 +86,7 @@ async function handleMessages(msg) {
     if (session[phoneNumber]?.message) {
         console.log("session[phoneNumber]['message']");
         console.log(session[phoneNumber].message);
-        await chat.sendMessage(session[phoneNumber].message.message);
+        await chat.sendMessage(session[phoneNumber].message);
 
         session[phoneNumber].message = false
 

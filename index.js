@@ -218,6 +218,27 @@ app.post('/send-message-success', async (req, res) => {
     try {
         await client.sendMessage(formattedNumber, message);
         await client.sendMessage(formattedNumber, "Baik Kak, apakah ada yang dapat saya bantu lagi?\n1. Berbicara dengan Customer Service\n2. Kembali ke Menu Utama\n3. Tidak terima kasih");
+        if (!Object.prototype.hasOwnProperty.call(session, phoneNumber)) {
+            session[number] = {
+                question_id: 0,
+                question: "",
+                answer: "",
+                number: number,
+                answer_option: "0",
+                option: [],
+                media_type: "", 
+                media_path: "",
+                name: "",
+                upgrade:"",
+                variant: "",
+                produk_id: "",
+                produk_name: "",
+                produk_code: "",
+                price: "",
+                updated_at: new Date(),
+                created_at: new Date(),
+            };
+        }
         session[number].question_id = "99"
         session[number].question = "Baik Kak, apakah ada yang dapat saya bantu lagi?\n1. Berbicara dengan Customer Service\n2. Kembali ke Menu Utama\n3. Tidak terima kasih"
         session[number].answer_option = "option"

@@ -18,7 +18,9 @@ async function handleAnswer(answer, custNumber) {
             produk_id: "",
             produk_name: "",
             produk_code: "",
-            price: ""
+            price: "",
+            updated_at: new Date(),
+            created_at: new Date(),
         };
     } else {
         session[custNumber].answer = answer;
@@ -46,7 +48,9 @@ async function handleAnswer(answer, custNumber) {
         produk_id: response.produk_id,
         produk_name: response.produk_name,
         produk_code:response.produk_code,
-        price: response.price
+        price: response.price,
+        updated_at: new Date(),
+        created_at: session[custNumber]["created_at"],
     };
 
     return true;

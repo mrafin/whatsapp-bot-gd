@@ -128,7 +128,9 @@ async function botControl(body) {
         next_question_id = flowBot[question_id][answer];
     } else if (currentAnswerList.includes("email")) {
         if (isValidEmail(answer)) {
+            // const upgraded = await postData("https://devgoldendigital.my.id/api/transactions/upgrade", {"email":answer});
             const upgraded = await postData("http://127.0.0.1:8000/api/transactions/upgrade", {"email":answer});
+            console.log("upgraded", upgraded);
             if (upgraded.message) {
                 // Object.assign(response, upgraded.data);
                 response.message = "Email yang anda masukan tidak ditemukan, mohon masukan email yang benar";
@@ -159,6 +161,7 @@ async function botControl(body) {
             next_question_id = flowBot[question_id]["produk"];
         }
     }else if (currentAnswerList.includes("upgrade")) {
+        // const upgraded = await postData("https://devgoldendigital.my.id/api/transactions/upgrade", {"email":response.upgrade});
         const upgraded = await postData("http://127.0.0.1:8000/api/transactions/upgrade", {"email":response.upgrade});
         if (upgraded.products) {
             
@@ -175,6 +178,7 @@ async function botControl(body) {
         // if (question_id === "10") response.message = redeemShopee(answer);
 
         if(question_id === "10"){
+            // const data_cred = await postData("https://devgoldendigital.my.id/api/transactions/claim_code", {transaction_code:answer})
             const data_cred = await postData("http://127.0.0.1:8000/api/transactions/claim_code", {transaction_code:answer})
             console.log(data_cred);
             if(data_cred.message){
@@ -252,6 +256,7 @@ async function botControl(body) {
         response.answer_option = "option";
         response.option = [...produkList.map(x => x.id_produk.toString()), "0"];
     }else if (nextAnswerList.includes("upgrade")) {
+        // const getProduk = await postData("https://devgoldendigital.my.id/api/transactions/upgrade", {"email":answer});
         const getProduk = await postData("http://127.0.0.1:8000/api/transactions/upgrade", {"email":answer});
         // console.log("https://devgoldendigital.my.id/api/get_detail_products/variance/"+response.variant);
         console.log(getProduk);

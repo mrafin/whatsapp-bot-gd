@@ -1,9 +1,10 @@
-const qrcode = require('qrcode-terminal');
+const qrcode = require('qrcode'); // Menggunakan qrcode untuk gambar
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const session = require('./features/session');
 const { handleMessages } = require('./features/handle_messages');
 const express = require('express');
 const axios = require('axios');
+const cron = require('node-cron');
 
 const app = express();
 const port = 3000;
@@ -26,9 +27,13 @@ const client = new Client({
     authStrategy: new LocalAuth()
 });
 
-client.on('qr', qr => {
+let qrCodeImageUrl = ''; // Variabel untuk menyimpan URL gambar QR Code
+
+client.on('qr', async qr => {
     console.log(qr)
-    qrcode.generate(qr, { small: true });
+    // Menghasilkan gambar QR Code dalam format Data URL
+    qrCodeImageUrl = await qrcode.toDataURL(qr);
+    console.log('QR Code siap, akses di http://localhost:3000/qrcode');
 
     // console.log(qr);
 });
@@ -44,48 +49,6 @@ client.on('auth_failure', () => {
 
 client.on('ready', async msg => {
     console.log('Client is ready!');
-
-    // Number where you want to send the message.
-    // const number = "+6281216913886";
-
-    // // // Your message.
-    // const text = "Hey john";
-
-    // // Getting chatId from the number.
-    // // we have to delete "+" from the beginning and add "@c.us" at the end of the number.
-    // const chatId = number.substring(1) + "@c.us";
-
-    // // Sending message.
-    // client.sendMessage(chatId, text);
-    // const number = "+6281216913886";
-
-    // // // Your message.
-    // // Your message.
-    // const messageText = "Oii";
-
-    // // Getting chatId from the number.
-    // // we have to delete "+" from the beginning and add "@c.us" at the end of the number.
-    // const chatId = number.substring(1) + "@c.us";
-
-    // // Function to send a message
-    // const sendMessage = () => {
-    //     client.sendMessage(chatId, messageText);
-    // };
-
-    // // Set an interval to send the message every 5 seconds (5000 milliseconds)
-    // const intervalId = setInterval(sendMessage, 1000);
-
-    // // Stop the interval after a certain number of iterations (e.g., 20 times)
-    // // This prevents the loop from running indefinitely
-    // let iterations = 0;
-    // const maxIterations = 10;
-
-    // const stopInterval = () => {
-    //     clearInterval(intervalId);
-    // };
-
-    // // Set a timeout to stop the interval after a certain number of iterations
-    // setTimeout(stopInterval, maxIterations * 1000);
 });
 
 const onConv = new Set()
@@ -116,6 +79,7 @@ client.on('message', async msg => {
     if(text.includes(claim_template) && get_uuid){
         const claim_code = get_uuid[0]
 
+        // const data_cred = await postData("https://devgoldendigital.my.id/api/transactions/claim_code", {transaction_code:claim_code})
         const data_cred = await postData("http://127.0.0.1:8000/api/transactions/claim_code", {transaction_code:claim_code})
         console.log(data_cred);
         if(data_cred.message){
@@ -135,6 +99,27 @@ client.on('message', async msg => {
 
         await chat.sendMessage(pesan)
         await chat.sendMessage("Baik Kak, apakah ada yang dapat saya bantu lagi?\n1. Berbicara dengan Customer Service\n2. Kembali ke Menu Utama\n3. Tidak terima kasih");
+        if (!Object.prototype.hasOwnProperty.call(session, phoneNumber)) {
+            session[phoneNumber] = {
+                question_id: 0,
+                question: "",
+                answer: "",
+                number: phoneNumber,
+                answer_option: "0",
+                option: [],
+                media_type: "", 
+                media_path: "",
+                name: "",
+                upgrade:"",
+                variant: "",
+                produk_id: "",
+                produk_name: "",
+                produk_code: "",
+                price: "",
+                updated_at: new Date(),
+                created_at: new Date(),
+            };
+        }    
         session[phoneNumber].question_id = "99"
         session[phoneNumber].question = "Baik Kak, apakah ada yang dapat saya bantu lagi?\n1. Berbicara dengan Customer Service\n2. Kembali ke Menu Utama\n3. Tidak terima kasih"
         session[phoneNumber].answer_option = "option"
@@ -185,7 +170,9 @@ client.on('message', async msg => {
         }
     }
 
-    if(phoneNumber === "6282245083753"){
+    const listNumber = ["6282245083753"]
+
+    if(listNumber.includes(phoneNumber)){
         if (!onConv.has(phoneNumber)){
             onConv.add(phoneNumber)
             await handleMessages(msg)
@@ -239,6 +226,32 @@ app.post('/send-message-success', async (req, res) => {
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
+});
+
+app.get('/qrcode', (req, res) => {
+    if (qrCodeImageUrl) {
+        res.send(`<img src="${qrCodeImageUrl}" alt="QR Code" />`);
+    } else {
+        res.send('QR Code belum tersedia. Tunggu sebentar...');
+    }
+});
+
+cron.schedule('* * * * *', () => {
+    console.log('Cron job berjalan setiap menit');
+    const treshHold = Date.now() - 60 * 60 * 1000;
+    // Iterasi melalui session dan hapus key yang updated_at > 1 jam
+    
+    for (const key in session) {
+        console.log(key);
+        console.log(treshHold);
+        if (session[key].updated_at < treshHold) {
+            console.log(`Menghapus session: ${key}`);
+            delete session[key];
+        }
+    }
+
+
+    // Tambahkan fungsi yang ingin dijalankan di sini
 });
 
 // Jalankan server Express

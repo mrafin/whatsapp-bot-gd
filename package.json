@@ -33,6 +33,7 @@
     "puppeteer-core": "^24.2.0",
     "qrcode": "^1.5.4",
     "qrcode-terminal": "^0.12.0",
+    "short-uuid": "^5.2.0",
     "uuid": "^11.0.5",
     "whatsapp-web.js": "^1.23.0"
   }

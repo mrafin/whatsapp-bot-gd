@@ -1,5 +1,5 @@
 const questionList = {
-    "1":"Selamat Datang di Golden Digital. Terima kasih telah menghubungi kami. Untuk info promo dapat dilihat pada website kami : https://www.goldendigital.web.id/ Silahkan memilih kebutuhan Anda:\n1. Lihat Katalog (Pembelian by Whatsapp)\n2. Pembelian by Shopee\n3. Upgrade Pembelian\n4. Informasi dan Kendala",
+    "1":"Selamat Datang di Golden Digital. Terima kasih telah menghubungi kami. Untuk info promo dapat dilihat pada website kami : https://www.goldendigital.web.id/ Silahkan memilih kebutuhan Anda:\n1. Lihat Katalog (Pembelian by Whatsapp)\n2. Upgrade Pembelian\n3. Informasi dan Kendala",
     "2":"Silahkah pilih menu:\n{variant}",
     "3":"Berikut pricelist {variant}:\n{produk}\n0. Kembali ke menu utama",
     "4":"Silahkan masukkan nama Anda\n\n0. Kembali ke Menu Utama",
@@ -16,7 +16,7 @@ const questionList = {
     "14":"Nama : {name}\nMenu : {produk} \nApakah data diatas sudah benar?\n1. Sudah, lanjut pembayaran\n\n0. Kembali ke Menu Utama",
     //"15":"Email produk sharing yang Anda kirim tidak ditemukan. Mohon kirim kembali email produk dengan benar.",
     "15":"Total: Rp {price}\nSilahkan transfer menggunakan QRIS berikut",
-    "16":"Informasi secara umum mengenai kendala yang dialami dapat diakses pada link berikut:\nhttps://www.goldendigital.web.id/ \n\nAtau dapat pilih\n1. Sambung Customer Service\n\n0. Kembali ke Menu Utama",
+    "16":"Informasi secara umum mengenai kendala yang dialami dapat diakses pada link berikut:\nhttps://www.goldendigital.web.id/faq \n\nAtau dapat pilih\n1. Sambung Customer Service\n\n0. Kembali ke Menu Utama",
     "17":"0. Kembali ke Menu Utama ",
     "99":"Baik Kak, apakah ada yang dapat saya bantu lagi?\n1. Berbicara dengan Customer Service\n2. Kembali ke Menu Utama\n3. Tidak terima kasih"
     

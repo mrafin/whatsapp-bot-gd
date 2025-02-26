@@ -152,7 +152,7 @@ client.on('message', async msg => {
 
     if(Object.prototype.hasOwnProperty.call(session[shopNumber], phoneNumber)){
         if(csSession.has(phoneNumber) ){
-            if(text === "0"){
+            if(text === "pl"){
                 delete session[shopNumber][phoneNumber]
                 csSession.delete(phoneNumber)
             }else{
@@ -173,7 +173,7 @@ client.on('message', async msg => {
         }else if(session[shopNumber][phoneNumber].question_id === "99" && text === "3"){
             delete session[shopNumber][phoneNumber]
 
-            const textEnd = `Terima kasih telah menggunakan layanan kami, ditunggu orderan lainnya:)\n\nKami menyediakan berbagai akun premium lainnya dan terdapat banyak promo menarik yang dapat diakses pada: https://golden-digital.vercel.app/\n\nSalam Hangat, Golden Digital:`
+            const textEnd = `Terima kasih telah menggunakan layanan kami, ditunggu orderan lainnya:)\n\nKami menyediakan berbagai akun premium lainnya dan terdapat banyak promo menarik yang dapat diakses pada: https://www.goldendigital.web.id/ \n\nSalam Hangat, Golden Digital:`
 
             chat.sendMessage(textEnd)
 
@@ -193,7 +193,11 @@ client.on('message', async msg => {
     }else{
         return "Customer Is Blocked"
     }
-
+    // if (!onConv.has(phoneNumber)){
+    //     onConv.add(phoneNumber)
+    //     await handleMessages(msg)
+    //     onConv.delete(phoneNumber)
+    // }
     
 
 });
@@ -268,23 +272,25 @@ app.get('/qrcode', (req, res) => {
     }
 });
 
-// cron.schedule('* * * * *', () => {
-//     console.log('Cron job berjalan setiap menit');
-//     const treshHold = Date.now() - 60 * 60 * 1000;
-//     // Iterasi melalui session dan hapus key yang updated_at > 1 jam
+cron.schedule('* * * * *', () => {
+    console.log('Cron job berjalan setiap menit');
+    const treshHold = Date.now() - 60 * 60 * 1000;
+    // Iterasi melalui session dan hapus key yang updated_at > 1 jam
     
-//     for (const key in session) {
-//         console.log(key);
-//         console.log(treshHold);
-//         if (session[key].updated_at < treshHold) {
-//             console.log(`Menghapus session: ${key}`);
-//             delete session[key];
-//         }
-//     }
+    for (const keys in session) {
+        for(const key in session[keys]){
+            console.log(key);
+            console.log(treshHold);
+            if (session[keys][key].updated_at < treshHold) {
+                console.log(`Menghapus session: ${key}`);
+                delete session[keys][key];
+            }
+        }
+    }
 
 
-//     // Tambahkan fungsi yang ingin dijalankan di sini
-// });
+    // Tambahkan fungsi yang ingin dijalankan di sini
+});
 
 // Jalankan server Express
 app.listen(port, () => {

@@ -65,9 +65,12 @@ client.on('message', async msg => {
 
     const message_from = msg._data.from;
     const cmd = message_from.split("@");
+    const message_to = msg._data.to;
+    const cmd1 = message_to.split("@");
     const chat = await msg.getChat();
 
     let phoneNumber = cmd[0];
+    let shopNumber = cmd1[0];
 
     if(phoneNumber === "status" | msg._data.type != "chat"){
         return
@@ -79,8 +82,8 @@ client.on('message', async msg => {
     if(text.includes(claim_template) && get_uuid){
         const claim_code = get_uuid[0]
 
-        // const data_cred = await postData("https://devgoldendigital.my.id/api/transactions/claim_code", {transaction_code:claim_code})
-        const data_cred = await postData("http://127.0.0.1:8000/api/transactions/claim_code", {transaction_code:claim_code})
+        const data_cred = await postData("https://devgoldendigital.my.id/api/transactions/claim_code", {transaction_code:claim_code})
+        // const data_cred = await postData("http://127.0.0.1:8000/api/transactions/claim_code", {transaction_code:claim_code})
         console.log(data_cred);
         if(data_cred.message){
             chat.sendMessage(`data tidak ditemukan dengan kode tersebut.`)
@@ -99,8 +102,13 @@ client.on('message', async msg => {
 
         await chat.sendMessage(pesan)
         await chat.sendMessage("Baik Kak, apakah ada yang dapat saya bantu lagi?\n1. Berbicara dengan Customer Service\n2. Kembali ke Menu Utama\n3. Tidak terima kasih");
-        if (!Object.prototype.hasOwnProperty.call(session, phoneNumber)) {
-            session[phoneNumber] = {
+        // Check if the session object for the shopNumber and custNumber exists
+        if (!Object.prototype.hasOwnProperty.call(session, shopNumber)) {
+            session[shopNumber] = {};
+        }
+
+        if (!Object.prototype.hasOwnProperty.call(session[shopNumber], phoneNumber)) {
+            session[shopNumber][phoneNumber] = {
                 question_id: 0,
                 question: "",
                 answer: "",
@@ -120,10 +128,10 @@ client.on('message', async msg => {
                 created_at: new Date(),
             };
         }    
-        session[phoneNumber].question_id = "99"
-        session[phoneNumber].question = "Baik Kak, apakah ada yang dapat saya bantu lagi?\n1. Berbicara dengan Customer Service\n2. Kembali ke Menu Utama\n3. Tidak terima kasih"
-        session[phoneNumber].answer_option = "option"
-        session[phoneNumber].option = ["2"]
+        session[shopNumber][phoneNumber].question_id = "99"
+        session[shopNumber][phoneNumber].question = "Baik Kak, apakah ada yang dapat saya bantu lagi?\n1. Berbicara dengan Customer Service\n2. Kembali ke Menu Utama\n3. Tidak terima kasih"
+        session[shopNumber][phoneNumber].answer_option = "option"
+        session[shopNumber][phoneNumber].option = ["2"]
         return
     }
 
@@ -137,30 +145,33 @@ client.on('message', async msg => {
         return
     }
 
-    
+    // Check if the session object for the shopNumber and custNumber exists
+    if (!Object.prototype.hasOwnProperty.call(session, shopNumber)) {
+        session[shopNumber] = {};
+    }
 
-    if(Object.prototype.hasOwnProperty.call(session, phoneNumber)){
+    if(Object.prototype.hasOwnProperty.call(session[shopNumber], phoneNumber)){
         if(csSession.has(phoneNumber) ){
             if(text === "0"){
-                delete session[phoneNumber]
+                delete session[shopNumber][phoneNumber]
                 csSession.delete(phoneNumber)
             }else{
                 return
             }
-        }else if(session[phoneNumber].question_id === "16" && text === "1"){
+        }else if(session[shopNumber][phoneNumber].question_id === "16" && text === "1"){
             csSession.add(phoneNumber)
 
             chat.sendMessage("Baik, sedang disambungkan ke CS, mohon ditunggu.")
 
             return
-        }else if(session[phoneNumber].question_id === "99" && text === "1"){
+        }else if(session[shopNumber][phoneNumber].question_id === "99" && text === "1"){
             csSession.add(phoneNumber)
 
             chat.sendMessage("Baik, sedang disambungkan ke CS, mohon ditunggu.")
 
             return
-        }else if(session[phoneNumber].question_id === "99" && text === "3"){
-            delete session[phoneNumber]
+        }else if(session[shopNumber][phoneNumber].question_id === "99" && text === "3"){
+            delete session[shopNumber][phoneNumber]
 
             const textEnd = `Terima kasih telah menggunakan layanan kami, ditunggu orderan lainnya:)\n\nKami menyediakan berbagai akun premium lainnya dan terdapat banyak promo menarik yang dapat diakses pada: https://golden-digital.vercel.app/\n\nSalam Hangat, Golden Digital:`
 
@@ -170,7 +181,7 @@ client.on('message', async msg => {
         }
     }
 
-    const listNumber = ["6282245083753"]
+    const listNumber = ["628977548890"]
 
     if(listNumber.includes(phoneNumber)){
         if (!onConv.has(phoneNumber)){
@@ -257,23 +268,23 @@ app.get('/qrcode', (req, res) => {
     }
 });
 
-cron.schedule('* * * * *', () => {
-    console.log('Cron job berjalan setiap menit');
-    const treshHold = Date.now() - 60 * 60 * 1000;
-    // Iterasi melalui session dan hapus key yang updated_at > 1 jam
+// cron.schedule('* * * * *', () => {
+//     console.log('Cron job berjalan setiap menit');
+//     const treshHold = Date.now() - 60 * 60 * 1000;
+//     // Iterasi melalui session dan hapus key yang updated_at > 1 jam
     
-    for (const key in session) {
-        console.log(key);
-        console.log(treshHold);
-        if (session[key].updated_at < treshHold) {
-            console.log(`Menghapus session: ${key}`);
-            delete session[key];
-        }
-    }
+//     for (const key in session) {
+//         console.log(key);
+//         console.log(treshHold);
+//         if (session[key].updated_at < treshHold) {
+//             console.log(`Menghapus session: ${key}`);
+//             delete session[key];
+//         }
+//     }
 
 
-    // Tambahkan fungsi yang ingin dijalankan di sini
-});
+//     // Tambahkan fungsi yang ingin dijalankan di sini
+// });
 
 // Jalankan server Express
 app.listen(port, () => {

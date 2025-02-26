@@ -1,9 +1,13 @@
 const { botControl } = require("./bot_control");
 const session = require("./session");
 
-async function handleAnswer(answer, custNumber) {
-    if (!Object.prototype.hasOwnProperty.call(session, custNumber)) {
-        session[custNumber] = {
+async function handleAnswer(answer, shopNumber, custNumber) {
+    if (!Object.prototype.hasOwnProperty.call(session, shopNumber)) {
+        session[shopNumber] = {};
+    }
+
+    if (!Object.prototype.hasOwnProperty.call(session[shopNumber], custNumber)) {
+        session[shopNumber][custNumber] = {
             question_id: 0,
             question: "",
             answer: "",
@@ -13,7 +17,7 @@ async function handleAnswer(answer, custNumber) {
             media_type: "", 
             media_path: "",
             name: "",
-            upgrade:"",
+            upgrade: "",
             variant: "",
             produk_id: "",
             produk_name: "",
@@ -23,16 +27,16 @@ async function handleAnswer(answer, custNumber) {
             created_at: new Date(),
         };
     } else {
-        session[custNumber].answer = answer;
+        session[shopNumber][custNumber].answer = answer;
     }
 
-    let body = session[custNumber];
+    let body = session[shopNumber][custNumber];
     console.log(body);
 
-    let response = await botControl(body);
+    let response = await botControl(body, shopNumber);
     console.log("------------------------------");
 
-    session[custNumber] = {
+    session[shopNumber][custNumber] = {
         question_id: response.question_id,
         question: response.question,
         message: response.message,
@@ -43,14 +47,14 @@ async function handleAnswer(answer, custNumber) {
         media_type: response.media_type,
         media_path: response.media_path,
         name: response.name,
-        upgrade:response.upgrade,
+        upgrade: response.upgrade,
         variant: response.variant,
         produk_id: response.produk_id,
         produk_name: response.produk_name,
-        produk_code:response.produk_code,
+        produk_code: response.produk_code,
         price: response.price,
         updated_at: new Date(),
-        created_at: session[custNumber]["created_at"],
+        created_at: session[shopNumber][custNumber]["created_at"],
     };
 
     return true;

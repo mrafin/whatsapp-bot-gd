@@ -83,7 +83,7 @@ function redeemShopee(code) {
 }
 
 // Main bot control function
-async function botControl(body) {
+async function botControl(body, shopNumber) {
     let { question_id, answer, number, variant, produk_id, produk_name, name, price, produk_code,upgrade } = body;
 
     let response = {
@@ -128,8 +128,8 @@ async function botControl(body) {
         next_question_id = flowBot[question_id][answer];
     } else if (currentAnswerList.includes("email")) {
         if (isValidEmail(answer)) {
-            // const upgraded = await postData("https://devgoldendigital.my.id/api/transactions/upgrade", {"email":answer});
-            const upgraded = await postData("http://127.0.0.1:8000/api/transactions/upgrade", {"email":answer});
+            const upgraded = await postData("https://devgoldendigital.my.id/api/transactions/upgrade", {"email":answer});
+            // const upgraded = await postData("http://127.0.0.1:8000/api/transactions/upgrade", {"email":answer});
             console.log("upgraded", upgraded);
             if (upgraded.message) {
                 // Object.assign(response, upgraded.data);
@@ -161,8 +161,8 @@ async function botControl(body) {
             next_question_id = flowBot[question_id]["produk"];
         }
     }else if (currentAnswerList.includes("upgrade")) {
-        // const upgraded = await postData("https://devgoldendigital.my.id/api/transactions/upgrade", {"email":response.upgrade});
-        const upgraded = await postData("http://127.0.0.1:8000/api/transactions/upgrade", {"email":response.upgrade});
+        const upgraded = await postData("https://devgoldendigital.my.id/api/transactions/upgrade", {"email":response.upgrade});
+        // const upgraded = await postData("http://127.0.0.1:8000/api/transactions/upgrade", {"email":response.upgrade});
         if (upgraded.products) {
             
             const produk = upgraded.products[upgraded.current_product.variance_name].find(x => x.id_produk.toString() === answer);
@@ -178,8 +178,8 @@ async function botControl(body) {
         // if (question_id === "10") response.message = redeemShopee(answer);
 
         if(question_id === "10"){
-            // const data_cred = await postData("https://devgoldendigital.my.id/api/transactions/claim_code", {transaction_code:answer})
-            const data_cred = await postData("http://127.0.0.1:8000/api/transactions/claim_code", {transaction_code:answer})
+            const data_cred = await postData("https://devgoldendigital.my.id/api/transactions/claim_code", {transaction_code:answer})
+            // const data_cred = await postData("http://127.0.0.1:8000/api/transactions/claim_code", {transaction_code:answer})
             console.log(data_cred);
             if(data_cred.message){
                 next_question_id = flowBot[question_id]["any"];
@@ -256,8 +256,8 @@ async function botControl(body) {
         response.answer_option = "option";
         response.option = [...produkList.map(x => x.id_produk.toString()), "0"];
     }else if (nextAnswerList.includes("upgrade")) {
-        // const getProduk = await postData("https://devgoldendigital.my.id/api/transactions/upgrade", {"email":answer});
-        const getProduk = await postData("http://127.0.0.1:8000/api/transactions/upgrade", {"email":answer});
+        const getProduk = await postData("https://devgoldendigital.my.id/api/transactions/upgrade", {"email":answer});
+        // const getProduk = await postData("http://127.0.0.1:8000/api/transactions/upgrade", {"email":answer});
         // console.log("https://devgoldendigital.my.id/api/get_detail_products/variance/"+response.variant);
         console.log(getProduk);
         let item_option=""
@@ -292,7 +292,7 @@ async function botControl(body) {
     if(response.question.includes("{link_payment}")){
         const transaction_uuid = uuidv4();
 
-        const url = `https://www.goldendigital.web.id/checkoutBot?external_id=${encodeURIComponent(response.produk_code)}&amount=${response.price}&id_price=${response.produk_id}&id_customer=0&id_promo=0&customer_name=${response.name.replace(" ", "%20")}&phone_customer=${number}&transaction_code=${transaction_uuid}&payment_status=PENDING&product=${response.variant}&product_price=${response.price}&tax=6000`
+        const url = `https://www.goldendigital.web.id/checkoutBot?external_id=${encodeURIComponent(response.produk_code)}&amount=${response.price}&id_price=${response.produk_id}&id_customer=0&id_promo=0&customer_name=${response.name.replace(" ", "%20")}&phone_customer=${number}&transaction_code=${transaction_uuid}&payment_status=PENDING&product=${response.variant}&product_price=${response.price}&tax=6000&claim_number=${shopNumber}`
         console.log("produk code ",encodeURIComponent(response.produk_code));
         response.question = response.question.replace("{link_payment}", url)
     }

@@ -11,9 +11,12 @@ async function handleMessages(msg) {
     const body = msg._data;
     const messageFrom = body.from;
     const cmd = messageFrom.split("@");
+    const messageTo = body.to;
+    const cmd1 = messageTo.split("@");
     const chat = await msg.getChat();
 
     let phoneNumber = cmd[0];  // Extract phone number from message sender
+    let shopNumber = cmd1[0];  // Extract phone number from message sender
 
     let msgText = "";
     if (body.type === "chat") {
@@ -22,26 +25,30 @@ async function handleMessages(msg) {
     console.log("session", session);
     console.log("phoneNumber", phoneNumber);
 
-    if(session === {}){
-        console.log("session benar")
-    }else if(session === "{}"){
-        console.log("session string")
-    }else{
-        console.log(typeof session)
-    }
+    // if(session === {}){
+    //     console.log("session benar")
+    // }else if(session === "{}"){
+    //     console.log("session string")
+    // }else{
+    //     console.log(typeof session)
+    // }
 
-    if (session && typeof session === "object" && !phoneNumber in session) {
-        console.log("session memiliki phoneNumber:", session[phoneNumber]);
-    } else {
-        console.log("session tidak memiliki phoneNumber");
-    }
+    // if (session && typeof session === "object" && !phoneNumber in session) {
+    //     console.log("session memiliki phoneNumber:", session[shopNumber][phoneNumber]);
+    // } else {
+    //     console.log("session tidak memiliki phoneNumber");
+    // }
 
+    // Check if the session object for the shopNumber and custNumber exists
+    if (!Object.prototype.hasOwnProperty.call(session, shopNumber)) {
+        session[shopNumber] = {};
+    }
     // Check if the session object for the phone number exists
-    if (!Object.prototype.hasOwnProperty.call(session, phoneNumber)) {
+    if (!Object.prototype.hasOwnProperty.call(session[shopNumber], phoneNumber)) {
         // If the session does not exist, create it and process the answer
-        await handleAnswer(msgText, phoneNumber);
+        await handleAnswer(msgText, shopNumber, phoneNumber);
     } else {
-        const currentSession = session[phoneNumber]; // Access the session for this phone number
+        const currentSession = session[shopNumber][phoneNumber]; // Access the session for this phone number
 
         // Handle different answer options
         if (currentSession.answer_option === "option") {
@@ -62,9 +69,9 @@ async function handleMessages(msg) {
 
         // Process answer if it's provided
         if (currentSession.answer !== "") {
-            await handleAnswer(msgText, phoneNumber);
+            await handleAnswer(msgText, shopNumber, phoneNumber);
         } else {
-            console.log("session[phoneNumber]:", currentSession);
+            console.log("session[shopNumber][phoneNumber]:", currentSession);
             console.log("messageText:", msgText);
             chat.sendMessage("Mohon jawab sesuai dengan instruksi");
         }
@@ -72,26 +79,26 @@ async function handleMessages(msg) {
 
     console.log(session);
 
-    let response = session[phoneNumber]?.question || "Default Response"; // Safe access
+    let response = session[shopNumber][phoneNumber]?.question || "Default Response"; // Safe access
     console.log("===============");
     console.log(response);
 
     // Optional: Handle media message (if needed)
-    if (session[phoneNumber]?.media_type !== "" && session[phoneNumber]?.media_path !== "") {
+    if (session[shopNumber][phoneNumber]?.media_type !== "" && session[shopNumber][phoneNumber]?.media_path !== "") {
 
-        chat.sendMessage(MessageMedia.fromFilePath(session[phoneNumber]?.media_path));
+        chat.sendMessage(MessageMedia.fromFilePath(session[shopNumber][phoneNumber]?.media_path));
     }
 
     // Handle custom message
-    if (session[phoneNumber]?.message) {
-        console.log("session[phoneNumber]['message']");
-        console.log(session[phoneNumber].message);
-        await chat.sendMessage(session[phoneNumber].message);
+    if (session[shopNumber][phoneNumber]?.message) {
+        console.log("session[shopNumber][phoneNumber]['message']");
+        console.log(session[shopNumber][phoneNumber].message);
+        await chat.sendMessage(session[shopNumber][phoneNumber].message);
 
-        session[phoneNumber].message = false
+        session[shopNumber][phoneNumber].message = false
 
-        // if (session[phoneNumber].message.status === "benar") {
-        //     delete session[phoneNumber]; // Clean up session after correct answer
+        // if (session[shopNumber][phoneNumber].message.status === "benar") {
+        //     delete session[shopNumber][phoneNumber]; // Clean up session after correct answer
         //     return;
         // }
     }

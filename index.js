@@ -36,7 +36,11 @@ const csSession = new Set()
 
 function createClient(clientId) {
     const client = new Client({
-        authStrategy: new LocalAuth({ clientId })
+        authStrategy: new LocalAuth({ clientId }),
+        puppeteer: {
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
+        }
+
     });
 
     client.on('qr', async (qr) => {

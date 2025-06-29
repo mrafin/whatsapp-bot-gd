@@ -1,5 +1,6 @@
 
 const axios = require('axios');
+
 const { v4: uuidv4 } = require('uuid');
 const flowBot = require('./flow_bot');
 const questionList = require('./question');
@@ -84,7 +85,7 @@ function redeemShopee(code) {
 
 // Main bot control function
 async function botControl(body, shopNumber) {
-    let { question_id, answer, number, variant, produk_id, produk_name, name, price, produk_code,upgrade } = body;
+    let { question_id, answer, number, variant, produk_id, produk_name, name,email, price, produk_code,upgrade } = body;
 
     let response = {
         question_id: "",
@@ -95,6 +96,7 @@ async function botControl(body, shopNumber) {
         media_type: "",
         media_path: "",
         name,
+        email,
         upgrade,
         variant,
         produk_id,
@@ -113,7 +115,7 @@ async function botControl(body, shopNumber) {
         response.question_id = next_question_id;
         response.question = questionList[next_question_id];
         response.answer_option = "option";
-        response.option = [1, 2, 3, 4, 5, 6];
+        response.option = [1, 2, 3, 4, 5];
         return response;
     }
 
@@ -128,18 +130,25 @@ async function botControl(body, shopNumber) {
         next_question_id = flowBot[question_id][answer];
     } else if (currentAnswerList.includes("email")) {
         if (isValidEmail(answer)) {
-            const upgraded = await postData("https://devgoldendigital.my.id/api/transactions/upgrade", {"email":answer});
-            // const upgraded = await postData("http://127.0.0.1:8000/api/transactions/upgrade", {"email":answer});
-            console.log("upgraded", upgraded);
-            if (upgraded.message) {
-                // Object.assign(response, upgraded.data);
-                response.message = "Email yang anda masukan tidak ditemukan, mohon masukan email yang benar";
-                next_question_id = flowBot[question_id]["email"]["salah"];
-            } else {
-                response.upgrade = answer;
-                next_question_id = flowBot[question_id]["email"]["benar"];
+            if(question_id === "19"){
+                next_question_id = flowBot[question_id]["email"]['benar'];
+                response.email = answer;
+            }else{
+                const upgraded = await postData("https://devgoldendigital.my.id/api/transactions/upgrade", {"email":answer});
+                // const upgraded = await postData("http://127.0.0.1:8000/api/transactions/upgrade", {"email":answer});
+                console.log("upgraded", upgraded);
+                if (upgraded.message) {
+                    // Object.assign(response, upgraded.data);
+                    response.message = "Email yang anda masukan tidak ditemukan, mohon masukan email yang benar";
+                    next_question_id = flowBot[question_id]["email"]["salah"];
+                } else {
+                    response.upgrade = answer;
+                    response.email = upgraded.current_product.email_customer === null?"kosong@temangabutmu.com":upgraded.current_product.email_customer;
+                    next_question_id = flowBot[question_id]["email"]["benar"];
+                }
             }
         } else {
+            
             response.message = "Mohon masukan format email yang benar";
             next_question_id = flowBot[question_id]["email"]["salah"];
             console.log("next_question_id", next_question_id);
@@ -170,7 +179,7 @@ async function botControl(body, shopNumber) {
             response.produk_id = answer;
             response.produk_name = produk?.detail_produk || "";
             response.produk_code = produk?.kode_produk || "";
-            response.price = produk?.harga_upgrade || "";
+            response.price = produk?.harga_upgrade;
             next_question_id = flowBot[question_id]["upgrade"];
         }
     } else if (currentAnswerList.includes("any")) {
@@ -178,20 +187,16 @@ async function botControl(body, shopNumber) {
         // if (question_id === "10") response.message = redeemShopee(answer);
 
         if(question_id === "10"){
-            const data_cred = await postData("https://devgoldendigital.my.id/api/transactions/claim_code", {transaction_code:answer})
+            const data_cred = await postData("https://devgoldendigital.my.id/api/transactions/claim_account_code", {account_code:answer})
             // const data_cred = await postData("http://127.0.0.1:8000/api/transactions/claim_code", {transaction_code:answer})
             console.log(data_cred);
-            if(data_cred.message){
+            if(data_cred.matching_account.length === 0){
                 next_question_id = flowBot[question_id]["any"];
                 response.message = "Format yang Anda kirim salah. Mohon kirim kembali format pemesanan dengan benar."
             }else{
-                const email = data_cred.email
-                const password = data_cred.password
-                const profile = data_cred.profile
-                const pin = data_cred.pin
-                const template = data_cred.template
+                
 
-                const pesan = `Terima kasih telah bertransaksi melalui Golden Digital. Berikut data credential anda:\n- email : ${email}\n- password : ${password}\n- profile : ${profile}\n- pin : ${pin}\n\n${template}`
+                const pesan = data_cred.matching_account[0].template
                 
                 next_question_id = "99"
                 response.message = pesan
@@ -295,6 +300,47 @@ async function botControl(body, shopNumber) {
         const url = `https://www.goldendigital.web.id/checkoutBot?external_id=${encodeURIComponent(response.produk_code)}&amount=${response.price}&id_price=${response.produk_id}&id_customer=0&id_promo=0&customer_name=${response.name.replace(" ", "%20")}&phone_customer=${number}&transaction_code=${transaction_uuid}&payment_status=PENDING&product=${response.variant}&product_price=${response.price}&tax=6000&claim_number=${shopNumber}`
         console.log("produk code ",encodeURIComponent(response.produk_code));
         response.question = response.question.replace("{link_payment}", url)
+    }
+    
+    if(response.question.includes("{email}")){
+        response.question = response.question.replace("{email}", response.email)
+    }
+    // Cek link payment
+    if(response.question.includes("{template_history}")){
+        const history =  await fetchData("https://devgoldendigital.my.id/api/transactions/by-wa/"+number);
+        if(history.data.length >0){// untuk get data
+            // Buat satu string
+            let output = "Berikut informasi transaksi Anda:\n\n";
+
+            // Tambahkan transaksi satu per satu
+            let totalProduk = 1
+            history.data.forEach((item, index) => {
+                if(item.akun.length >0){
+                    output += `${totalProduk}. ${item.akun[0].akun.product.variance_name} ${item.akun[0].akun.product.type_name} ${item.akun[0].akun.product.durasi} ${item.akun[0].akun.product.ket_durasi} dengan sisa masa berlaku ${item.akun[0].akun.countdown.sisa_hari} hari\n`;
+                    totalProduk+=1
+                }
+            });
+
+            // Tambahkan pilihan menu
+            output += `\nTambah transaksi?\n1. Iya\n2. Kembali ke Menu Utama`;
+            response.question = response.question.replace("{template_history}", output)
+        }else{
+            const text = `Tidak ada transaksi ditemukan.\n\nMari lakukan transaksi\n1. Iya\n2. Kembali ke Menu Utama
+            `
+            response.question = response.question.replace("{template_history}", text)
+        }
+    }
+
+    if(next_question_id === "6"){
+
+        const payments = await fetchData("https://devgoldendigital.my.id/api/list-payments")
+
+        const qris = payments.data.find(item => item.nama_payment === "QRIS");
+        const qrisImage = qris ? qris.image : null;
+        console.log(qrisImage);
+        
+        response.media_type = "image;url"
+        response.media_path = "https://devgoldendigital.my.id/public/uploads/payments/"+encodeURI(qrisImage)
     }
 
     if(next_question_id === "3"){

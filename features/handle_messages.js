@@ -68,7 +68,7 @@ async function handleMessages(msg) {
         }
 
         // Process answer if it's provided
-        if (currentSession.answer !== "") {
+        if (currentSession.answer !== ""|currentSession.question_id === "6") {
             await handleAnswer(msgText, shopNumber, phoneNumber);
         } else {
             console.log("session[shopNumber][phoneNumber]:", currentSession);
@@ -85,8 +85,15 @@ async function handleMessages(msg) {
 
     // Optional: Handle media message (if needed)
     if (session[shopNumber][phoneNumber]?.media_type !== "" && session[shopNumber][phoneNumber]?.media_path !== "") {
+        if(session[shopNumber][phoneNumber].media_type.includes("url")){
+            console.log(session[shopNumber][phoneNumber]?.media_path);
+            
+            const media = await MessageMedia.fromUrl(session[shopNumber][phoneNumber]?.media_path);
+            chat.sendMessage(media);
 
-        chat.sendMessage(MessageMedia.fromFilePath(session[shopNumber][phoneNumber]?.media_path));
+        }else{
+            chat.sendMessage(MessageMedia.fromFilePath(session[shopNumber][phoneNumber]?.media_path));
+        }
     }
 
     // Handle custom message

@@ -95,11 +95,11 @@ function createClient(clientId) {
         console.log(2);
         let phoneNumber = cmd[0];
         let shopNumber = cmd1[0];
-        const listNumber = ["6282245083753"]
+        // const listNumber = ["6282245083753"]
 
-        if(!listNumber.includes(phoneNumber)){
-            return
-        }
+        // if(!listNumber.includes(phoneNumber)){
+        //     return
+        // }
         
         if(phoneNumber === "status"){
             return
@@ -375,16 +375,16 @@ function createClient(clientId) {
 
         
 
-        if(listNumber.includes(phoneNumber)){
-            if (!onConv.has(phoneNumber)){
-                onConv.add(phoneNumber)
-                await handleMessages(msg)
-                onConv.delete(phoneNumber)
-            }
-            
-        }else{
-            return "Customer Is Blocked"
+        // if(listNumber.includes(phoneNumber)){
+        if (!onConv.has(phoneNumber)){
+            onConv.add(phoneNumber)
+            await handleMessages(msg)
+            onConv.delete(phoneNumber)
         }
+            
+        // }else{
+        //     return "Customer Is Blocked"
+        // }
         // if (!onConv.has(phoneNumber)){
         //     onConv.add(phoneNumber)
         //     await handleMessages(msg)

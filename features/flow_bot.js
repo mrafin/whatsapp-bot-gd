@@ -55,7 +55,7 @@ const flow_bot = {
         "0":"1"
     },
     "13":{
-        "email":{
+        "transcation_code":{
             "benar":"18",
             "salah":"13"
             },

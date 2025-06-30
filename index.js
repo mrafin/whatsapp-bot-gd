@@ -33,6 +33,20 @@ const qrCodes = {};
 const onConv = new Set()
 const csSession = new Set()
 
+function isClaimFormatValid(teks) {
+  const lines = teks.trim().split(/\r?\n/).map(line => line.trim());
+
+  return (
+    lines.length >= 6 &&
+    lines[0].toLowerCase() === "halo," &&
+    lines[1].toLowerCase().startsWith("nama :") &&
+    lines[2].toLowerCase().startsWith("email :") &&
+    lines[3].toLowerCase().includes("ingin klaim akun pembelian") &&
+    lines[4].toLowerCase().startsWith("nama shopee:") &&
+    lines[5].toLowerCase().startsWith("kode") && lines[5].toLowerCase().includes("admin")
+  );
+}
+
 
 function createClient(clientId) {
     const client = new Client({
@@ -81,6 +95,11 @@ function createClient(clientId) {
         console.log(2);
         let phoneNumber = cmd[0];
         let shopNumber = cmd1[0];
+        const listNumber = ["6282245083753"]
+
+        if(!listNumber.includes(phoneNumber)){
+            return
+        }
         
         if(phoneNumber === "status"){
             return
@@ -88,55 +107,78 @@ function createClient(clientId) {
         console.log(3);
 
         try{
-            const regexClaimExt = /kode\s+dari\s+admin\s*:\s*(.+)/i;
-            const matchClaimExt = text.match(regexClaimExt);
-    
-            if(matchClaimExt){
-                const kode = matchClaimExt[1].trim();
+            if(isClaimFormatValid(text)) {
 
-                const data_cred = await postData("https://devgoldendigital.my.id/api/transactions/claim_account_code", {account_code:kode})
-                console.log(data_cred);
-                if(data_cred.matching_account.length === 0){
-                    chat.sendMessage(`data tidak ditemukan dengan kode tersebut.`)
-                    return
+                const namaMatch = text.match(/nama\s*:\s*(\w+)/i);
+                const emailMatch = text.match(/email\s*:\s*([\w.-]+@[\w.-]+\.\w+)/i);
+                const kodeMatch = text.match(/kode\s+dari\s+admin\s*:\s*(.+)/i);
+                
+                // Jika salah satu tidak ditemukan, return null
+                if (!namaMatch || !emailMatch || !kodeMatch) {
+                    chat.sendMessage(`Mohon isi nama, email, dan kode dari admin agar bisa melakukan klaim akun.`)
+                    return 
                 }else{
-                    
+                    const kodeAkunClaim = kodeMatch[1].trim();
+                    const emailClaim = emailMatch[1].trim();
+                    const namaClaim = namaMatch[1].trim();
 
-                    const pesan = data_cred.matching_account[0].template
-                    
-                    await chat.sendMessage(pesan)
-                    await chat.sendMessage("Baik Kak, apakah ada yang dapat saya bantu lagi?\n1. Berbicara dengan Customer Service\n2. Kembali ke Menu Utama\n3. Tidak terima kasih");
-                    // Check if the session object for the shopNumber and custNumber exists
-                    if (!Object.prototype.hasOwnProperty.call(session, shopNumber)) {
-                        session[shopNumber] = {};
+                    const data_cred = await postData("https://devgoldendigital.my.id/api/transactions/claim_account_code", {account_code:kodeAkunClaim})
+                    console.log(data_cred);
+                    if(data_cred.matching_account.length === 0){
+                        chat.sendMessage(`Transaksi masih dalam proses, mohon ditunggu.`)
+                        return
+                    }else{
+                        const bodyClaimShopee = {
+                            "id_produk": data_cred.matching_account[0].id_produk,
+                            "nama_customer": namaClaim,
+                            "email_customer": emailClaim,
+                            "wa": phoneNumber
+                        }
+                        const data_cred_2 = await postData("https://devgoldendigital.my.id/api/shopee-claims", bodyClaimShopee)
+
+                        if(data_cred_2===null){
+                            chat.sendMessage(`Mohon isi nama, email, dan kode dari admin agar bisa melakukan klaim akun.`)
+                            return 
+                        }
+
+                        // const data_cred = await postData("http://
+                        const pesan = data_cred.matching_account[0].template
+                        
+                        await chat.sendMessage(pesan)
+                        await chat.sendMessage("Baik Kak, apakah ada yang dapat saya bantu lagi?\n1. Berbicara dengan Customer Service\n2. Kembali ke Menu Utama\n3. Tidak terima kasih");
+                        
+                        // Check if the session object for the shopNumber and custNumber exists
+                        if (!Object.prototype.hasOwnProperty.call(session, shopNumber)) {
+                            session[shopNumber] = {};
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(session[shopNumber], phoneNumber)) {
+                            session[shopNumber][phoneNumber] = {
+                                question_id: 0,
+                                question: "",
+                                answer: "",
+                                number: phoneNumber,
+                                answer_option: "0",
+                                option: [],
+                                media_type: "", 
+                                media_path: "",
+                                name: "",
+                                upgrade:"",
+                                variant: "",
+                                produk_id: "",
+                                produk_name: "",
+                                produk_code: "",
+                                price: "",
+                                updated_at: new Date(),
+                                created_at: new Date(),
+                            };
+                        }    
+                        session[shopNumber][phoneNumber].question_id = "99"
+                        session[shopNumber][phoneNumber].question = "Baik Kak, apakah ada yang dapat saya bantu lagi?\n1. Berbicara dengan Customer Service\n2. Kembali ke Menu Utama\n3. Tidak terima kasih"
+                        session[shopNumber][phoneNumber].answer_option = "option"
+                        session[shopNumber][phoneNumber].option = ["2"]
+                        return
                     }
-
-                    if (!Object.prototype.hasOwnProperty.call(session[shopNumber], phoneNumber)) {
-                        session[shopNumber][phoneNumber] = {
-                            question_id: 0,
-                            question: "",
-                            answer: "",
-                            number: phoneNumber,
-                            answer_option: "0",
-                            option: [],
-                            media_type: "", 
-                            media_path: "",
-                            name: "",
-                            upgrade:"",
-                            variant: "",
-                            produk_id: "",
-                            produk_name: "",
-                            produk_code: "",
-                            price: "",
-                            updated_at: new Date(),
-                            created_at: new Date(),
-                        };
-                    }    
-                    session[shopNumber][phoneNumber].question_id = "99"
-                    session[shopNumber][phoneNumber].question = "Baik Kak, apakah ada yang dapat saya bantu lagi?\n1. Berbicara dengan Customer Service\n2. Kembali ke Menu Utama\n3. Tidak terima kasih"
-                    session[shopNumber][phoneNumber].answer_option = "option"
-                    session[shopNumber][phoneNumber].option = ["2"]
-                    return
                 }
             }
         }catch(e){
@@ -146,60 +188,62 @@ function createClient(clientId) {
         
 
         const claim_template = "Halo, saya ingin klaim akun dengan kode transaksi"
-        
-        if(text.includes(claim_template)){
-            const get_uuid = text.match(/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/);
-            const claim_code = get_uuid[0]
+        try{
 
-            const data_cred = await postData("https://devgoldendigital.my.id/api/transactions/claim_transaction_code", {transaction_code:claim_code})
-            // const data_cred = await postData("http://127.0.0.1:8000/api/transactions/claim_code", {transaction_code:claim_code})
-            // console.log(data_cred);
-            if(data_cred === null){
-                chat.sendMessage(`data tidak ditemukan dengan kode tersebut.`)
+            if(text.includes(claim_template)){
+                const get_uuid = text.match(/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/);
+                const claim_code = get_uuid[0]
+    
+                const data_cred = await postData("https://devgoldendigital.my.id/api/transactions/claim_transaction_code", {transaction_code:claim_code})
+                // const data_cred = await postData("http://127.0.0.1:8000/api/transactions/claim_code", {transaction_code:claim_code})
+                // console.log(data_cred);
+                if(data_cred === null){
+                    chat.sendMessage(`Transaksi masih dalam proses, mohon ditunggu.`)
+                    return
+                }
+    
+           
+                const template = data_cred.template
+    
+                const pesan = template
+    
+    
+    
+                await chat.sendMessage(pesan)
+                await chat.sendMessage("Baik Kak, apakah ada yang dapat saya bantu lagi?\n1. Berbicara dengan Customer Service\n2. Kembali ke Menu Utama\n3. Tidak terima kasih");
+                // Check if the session object for the shopNumber and custNumber exists
+                if (!Object.prototype.hasOwnProperty.call(session, shopNumber)) {
+                    session[shopNumber] = {};
+                }
+    
+                if (!Object.prototype.hasOwnProperty.call(session[shopNumber], phoneNumber)) {
+                    session[shopNumber][phoneNumber] = {
+                        question_id: 0,
+                        question: "",
+                        answer: "",
+                        number: phoneNumber,
+                        answer_option: "0",
+                        option: [],
+                        media_type: "", 
+                        media_path: "",
+                        name: "",
+                        upgrade:"",
+                        variant: "",
+                        produk_id: "",
+                        produk_name: "",
+                        produk_code: "",
+                        price: "",
+                        updated_at: new Date(),
+                        created_at: new Date(),
+                    };
+                }    
+                session[shopNumber][phoneNumber].question_id = "99"
+                session[shopNumber][phoneNumber].question = "Baik Kak, apakah ada yang dapat saya bantu lagi?\n1. Berbicara dengan Customer Service\n2. Kembali ke Menu Utama\n3. Tidak terima kasih"
+                session[shopNumber][phoneNumber].answer_option = "option"
+                session[shopNumber][phoneNumber].option = ["2"]
                 return
             }
-
-       
-            const template = data_cred.template
-
-            const pesan = template
-
-
-
-            await chat.sendMessage(pesan)
-            await chat.sendMessage("Baik Kak, apakah ada yang dapat saya bantu lagi?\n1. Berbicara dengan Customer Service\n2. Kembali ke Menu Utama\n3. Tidak terima kasih");
-            // Check if the session object for the shopNumber and custNumber exists
-            if (!Object.prototype.hasOwnProperty.call(session, shopNumber)) {
-                session[shopNumber] = {};
-            }
-
-            if (!Object.prototype.hasOwnProperty.call(session[shopNumber], phoneNumber)) {
-                session[shopNumber][phoneNumber] = {
-                    question_id: 0,
-                    question: "",
-                    answer: "",
-                    number: phoneNumber,
-                    answer_option: "0",
-                    option: [],
-                    media_type: "", 
-                    media_path: "",
-                    name: "",
-                    upgrade:"",
-                    variant: "",
-                    produk_id: "",
-                    produk_name: "",
-                    produk_code: "",
-                    price: "",
-                    updated_at: new Date(),
-                    created_at: new Date(),
-                };
-            }    
-            session[shopNumber][phoneNumber].question_id = "99"
-            session[shopNumber][phoneNumber].question = "Baik Kak, apakah ada yang dapat saya bantu lagi?\n1. Berbicara dengan Customer Service\n2. Kembali ke Menu Utama\n3. Tidak terima kasih"
-            session[shopNumber][phoneNumber].answer_option = "option"
-            session[shopNumber][phoneNumber].option = ["2"]
-            return
-        }
+        }catch(e){}
 
         if (!Object.prototype.hasOwnProperty.call(session, shopNumber)) {
             session[shopNumber] = {};
@@ -300,7 +344,7 @@ function createClient(clientId) {
 
         if(Object.prototype.hasOwnProperty.call(session[shopNumber], phoneNumber)){
             if(csSession.has(phoneNumber) ){
-                if(text === "pl"){
+                if(text.toLowerCase() === "kembali ke menu utama"){
                     delete session[shopNumber][phoneNumber]
                     csSession.delete(phoneNumber)
                 }else{
@@ -321,7 +365,7 @@ function createClient(clientId) {
             }else if(session[shopNumber][phoneNumber].question_id === "99" && text === "3"){
                 delete session[shopNumber][phoneNumber]
 
-                const textEnd = `Terima kasih telah menggunakan layanan kami, ditunggu orderan lainnya:)\n\nKami menyediakan berbagai akun premium lainnya dan terdapat banyak promo menarik yang dapat diakses pada: https://www.goldendigital.web.id/ \n\nSalam Hangat, Golden Digital:`
+                const textEnd = `Terima kasih telah menggunakan layanan kami, ditunggu orderan lainnya:)\n\nKami menyediakan berbagai akun premium lainnya dan terdapat banyak promo menarik yang dapat diakses pada: https://temangabutmu.com/ \n\nSalam Hangat, Golden Digital:`
 
                 chat.sendMessage(textEnd)
 
@@ -329,7 +373,7 @@ function createClient(clientId) {
             }
         }
 
-        const listNumber = ["6281215964125"]
+        
 
         if(listNumber.includes(phoneNumber)){
             if (!onConv.has(phoneNumber)){
@@ -448,7 +492,7 @@ app.listen(port, () => {
 //         // const data_cred = await postData("http://127.0.0.1:8000/api/transactions/claim_code", {transaction_code:claim_code})
 //         console.log(data_cred);
 //         if(data_cred.message){
-//             chat.sendMessage(`data tidak ditemukan dengan kode tersebut.`)
+//             chat.sendMessage(`Transaksi masih dalam proses, mohon ditunggu.`)
 //             return
 //         }
 
@@ -615,7 +659,7 @@ app.listen(port, () => {
 //         }else if(session[shopNumber][phoneNumber].question_id === "99" && text === "3"){
 //             delete session[shopNumber][phoneNumber]
 
-//             const textEnd = `Terima kasih telah menggunakan layanan kami, ditunggu orderan lainnya:)\n\nKami menyediakan berbagai akun premium lainnya dan terdapat banyak promo menarik yang dapat diakses pada: https://www.goldendigital.web.id/ \n\nSalam Hangat, Golden Digital:`
+//             const textEnd = `Terima kasih telah menggunakan layanan kami, ditunggu orderan lainnya:)\n\nKami menyediakan berbagai akun premium lainnya dan terdapat banyak promo menarik yang dapat diakses pada: https://temangabutmu.com/ \n\nSalam Hangat, Golden Digital:`
 
 //             chat.sendMessage(textEnd)
 
@@ -726,6 +770,8 @@ cron.schedule('* * * * *', () => {
             if (session[keys][key].updated_at < treshHold) {
                 console.log(`Menghapus session: ${key}`);
                 delete session[keys][key];
+                onConv.delete(key)
+                csSession.delete(key)
             }
         }
     }

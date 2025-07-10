@@ -32,8 +32,8 @@ function generateCustomId(length = 12) {
 }
 
 function cekFormat16(text) {
-  const pattern = /^16[1-9][0-9]*$/;
-  return pattern.test(text);
+  
+  return text.startsWith("16");
 }
 
 function cekFormatCS(teks) {
@@ -147,11 +147,11 @@ function createClient(clientId) {
         console.log(2);
         let phoneNumber = cmd[0];
         let shopNumber = cmd1[0];
-        const listNumber = ["628977548890"]
+        // const listNumber = ["628977548890"]
 
-        if(!listNumber.includes(phoneNumber)){
-            return
-        }
+        // if(!listNumber.includes(phoneNumber)){
+        //     return
+        // }
         
         if(phoneNumber === "status"){
             return
@@ -458,16 +458,16 @@ function createClient(clientId) {
 
         
 
-        if(listNumber.includes(phoneNumber)){
+        // if(listNumber.includes(phoneNumber)){
             if (!onConv.has(phoneNumber)){
                 onConv.add(phoneNumber)
                 await handleMessages(msg)
                 onConv.delete(phoneNumber)
             }
             
-        }else{
-            return "Customer Is Blocked"
-        }
+        // }else{
+        //     return "Customer Is Blocked"
+        // }
         // if (!onConv.has(phoneNumber)){
         //     onConv.add(phoneNumber)
         //     await handleMessages(msg)

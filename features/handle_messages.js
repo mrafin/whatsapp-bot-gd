@@ -2,9 +2,14 @@ const session = require("./session");
 const { handleAnswer } = require("./handle_answer");
 const { MessageMedia } = require('whatsapp-web.js');
 
+
 function isValidEmail(email) {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     return emailRegex.test(email);
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, 5000));
 }
 
 async function handleMessages(msg) {
@@ -73,6 +78,7 @@ async function handleMessages(msg) {
         } else {
             console.log("session[shopNumber][phoneNumber]:", currentSession);
             console.log("messageText:", msgText);
+            await sleep(10000)
             chat.sendMessage("Mohon jawab sesuai dengan instruksi");
         }
     }
@@ -89,9 +95,11 @@ async function handleMessages(msg) {
             console.log(session[shopNumber][phoneNumber]?.media_path);
             
             const media = await MessageMedia.fromUrl(session[shopNumber][phoneNumber]?.media_path);
+            await sleep(10000)
             chat.sendMessage(media);
 
         }else{
+            await sleep(10000)
             chat.sendMessage(MessageMedia.fromFilePath(session[shopNumber][phoneNumber]?.media_path));
         }
     }
@@ -100,6 +108,7 @@ async function handleMessages(msg) {
     if (session[shopNumber][phoneNumber]?.message) {
         console.log("session[shopNumber][phoneNumber]['message']");
         console.log(session[shopNumber][phoneNumber].message);
+        await sleep(10000)
         await chat.sendMessage(session[shopNumber][phoneNumber].message);
 
         session[shopNumber][phoneNumber].message = false
@@ -111,6 +120,7 @@ async function handleMessages(msg) {
     }
 
     // Send response message
+    await sleep(10000)
     chat.sendMessage(response);
 }
 

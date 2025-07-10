@@ -9,6 +9,7 @@ const cron = require('node-cron');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 const FormData = require('form-data'); // ini dari package npm 'form-data'
+const { convert } = require('html-to-text');
 
 
 const app = express();
@@ -16,6 +17,34 @@ const port = 3001;
 
 // Middleware untuk parsing JSON
 app.use(express.json());
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, 5000));
+}
+
+function generateCustomId(length = 12) {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
+function cekFormat16(text) {
+  const pattern = /^16[1-9][0-9]*$/;
+  return pattern.test(text);
+}
+
+function cekFormatCS(teks) {
+  const regex = /PRODUK YANG DI BELI\s*:\s*.+\s+(?:VARIAN.*\s+)?EMAIL AKUN PRODUK\s*:\s*.+/i;
+  return regex.test(teks);
+}
+
+function isValidEmail(email) {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
+}
 
 async function postData(url, body) {
     try {
@@ -36,16 +65,39 @@ const csSession = new Set()
 function isClaimFormatValid(teks) {
   const lines = teks.trim().split(/\r?\n/).map(line => line.trim());
 
+  // Cari indeks baris yang berisi "Halo,"
+  const haloIndex = lines.findIndex(line => line.toLowerCase() === "halo,");
+  
+  if (haloIndex === -1 || lines.length < haloIndex + 6) {
+    return false;
+  }
+
+  const formLines = lines.slice(haloIndex, haloIndex + 6);
+
   return (
-    lines.length >= 6 &&
-    lines[0].toLowerCase() === "halo," &&
-    lines[1].toLowerCase().startsWith("nama :") &&
-    lines[2].toLowerCase().startsWith("email :") &&
-    lines[3].toLowerCase().includes("ingin klaim akun pembelian") &&
-    lines[4].toLowerCase().startsWith("nama shopee:") &&
-    lines[5].toLowerCase().startsWith("kode") && lines[5].toLowerCase().includes("admin")
+    formLines[0].toLowerCase() === "halo," &&
+    formLines[1].toLowerCase().startsWith("nama") &&
+    formLines[2].toLowerCase().startsWith("email") &&
+    formLines[3].toLowerCase().includes("ingin klaim akun pembelian") &&
+    formLines[4].toLowerCase().startsWith("nama shopee") &&
+    formLines[5].toLowerCase().startsWith("kode") &&
+    formLines[5].toLowerCase().includes("admin")
   );
 }
+
+function formatNetflixText(rawHtml) {
+  const text = convert(rawHtml, {
+    wordwrap: false,
+    selectors: [
+      { selector: 'a', options: { ignoreHref: true } },
+      { selector: 'p', format: 'paragraph' },
+      { selector: 'br', format: 'lineBreak' }
+    ]
+  });
+
+  return text.trim();
+}
+
 
 
 function createClient(clientId) {
@@ -95,11 +147,11 @@ function createClient(clientId) {
         console.log(2);
         let phoneNumber = cmd[0];
         let shopNumber = cmd1[0];
-        // const listNumber = ["6282245083753"]
+        const listNumber = ["628977548890"]
 
-        // if(!listNumber.includes(phoneNumber)){
-        //     return
-        // }
+        if(!listNumber.includes(phoneNumber)){
+            return
+        }
         
         if(phoneNumber === "status"){
             return
@@ -109,12 +161,16 @@ function createClient(clientId) {
         try{
             if(isClaimFormatValid(text)) {
 
-                const namaMatch = text.match(/nama\s*:\s*(\w+)/i);
-                const emailMatch = text.match(/email\s*:\s*([\w.-]+@[\w.-]+\.\w+)/i);
-                const kodeMatch = text.match(/kode\s+dari\s+admin\s*:\s*(.+)/i);
+                // const namaMatch = text.match(/nama\s*:\s*(\w+)/i);
+                // const emailMatch = text.match(/email\s*:\s*([\w.-]+@[\w.-]+\.\w+)/i);
+                // const kodeMatch = text.match(/kode\s+dari\s+admin\s*:\s*(.+)/i);
+                const namaMatch = text.match(/nama\s*:\s*([^\n(]+)/i);
+                const emailMatch = text.match(/email\s*:\s*([^\n(]+)/i);
+                const kodeMatch = text.match(/kode\s+dari\s+admin\s*:\s*([^\n(]+)/i);
                 
                 // Jika salah satu tidak ditemukan, return null
                 if (!namaMatch || !emailMatch || !kodeMatch) {
+                    await sleep(10000)
                     chat.sendMessage(`Mohon isi nama, email, dan kode dari admin agar bisa melakukan klaim akun.`)
                     return 
                 }else{
@@ -125,6 +181,7 @@ function createClient(clientId) {
                     const data_cred = await postData("https://devgoldendigital.my.id/api/transactions/claim_account_code", {account_code:kodeAkunClaim})
                     console.log(data_cred);
                     if(data_cred.matching_account.length === 0){
+                        await sleep(10000)
                         chat.sendMessage(`Transaksi masih dalam proses, mohon ditunggu.`)
                         return
                     }else{
@@ -137,15 +194,16 @@ function createClient(clientId) {
                         const data_cred_2 = await postData("https://devgoldendigital.my.id/api/shopee-claims", bodyClaimShopee)
 
                         if(data_cred_2===null){
+                            await sleep(10000)
                             chat.sendMessage(`Mohon isi nama, email, dan kode dari admin agar bisa melakukan klaim akun.`)
                             return 
                         }
 
                         // const data_cred = await postData("http://
                         const pesan = data_cred.matching_account[0].template
-                        
-                        await chat.sendMessage(pesan)
-                        await chat.sendMessage("Baik Kak, apakah ada yang dapat saya bantu lagi?\n1. Berbicara dengan Customer Service\n2. Kembali ke Menu Utama\n3. Tidak terima kasih");
+                        await sleep(10000)
+                        await chat.sendMessage(formatNetflixText(pesan))
+                        await chat.sendMessage("Apakah terdapat kendala?\n\n1. Ya\n2. Tidak, Kembali ke Menu Utama");
                         
                         // Check if the session object for the shopNumber and custNumber exists
                         if (!Object.prototype.hasOwnProperty.call(session, shopNumber)) {
@@ -174,15 +232,16 @@ function createClient(clientId) {
                             };
                         }    
                         session[shopNumber][phoneNumber].question_id = "99"
-                        session[shopNumber][phoneNumber].question = "Baik Kak, apakah ada yang dapat saya bantu lagi?\n1. Berbicara dengan Customer Service\n2. Kembali ke Menu Utama\n3. Tidak terima kasih"
+                        session[shopNumber][phoneNumber].question = "Apakah terdapat kendala?\n\n1. Ya\n2. Tidak, Kembali ke Menu Utama"
                         session[shopNumber][phoneNumber].answer_option = "option"
-                        session[shopNumber][phoneNumber].option = ["2"]
+                        session[shopNumber][phoneNumber].option = ["1","2"]
                         return
                     }
                 }
             }
         }catch(e){
-
+            console.log("Error parsing claim format: ", e);
+            
         }
         
         
@@ -191,13 +250,14 @@ function createClient(clientId) {
         try{
 
             if(text.includes(claim_template)){
-                const get_uuid = text.match(/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/);
+                const get_uuid = text.match(/[A-Za-z0-9]{12}/);
                 const claim_code = get_uuid[0]
     
                 const data_cred = await postData("https://devgoldendigital.my.id/api/transactions/claim_transaction_code", {transaction_code:claim_code})
                 // const data_cred = await postData("http://127.0.0.1:8000/api/transactions/claim_code", {transaction_code:claim_code})
                 // console.log(data_cred);
                 if(data_cred === null){
+                    await sleep(10000)
                     chat.sendMessage(`Transaksi masih dalam proses, mohon ditunggu.`)
                     return
                 }
@@ -208,9 +268,9 @@ function createClient(clientId) {
                 const pesan = template
     
     
-    
-                await chat.sendMessage(pesan)
-                await chat.sendMessage("Baik Kak, apakah ada yang dapat saya bantu lagi?\n1. Berbicara dengan Customer Service\n2. Kembali ke Menu Utama\n3. Tidak terima kasih");
+                await sleep(10000)
+                await chat.sendMessage(formatNetflixText(pesan))
+                await chat.sendMessage("Apakah terdapat kendala?\n\n1. Ya\n2. Tidak, Kembali ke Menu Utama");
                 // Check if the session object for the shopNumber and custNumber exists
                 if (!Object.prototype.hasOwnProperty.call(session, shopNumber)) {
                     session[shopNumber] = {};
@@ -238,9 +298,9 @@ function createClient(clientId) {
                     };
                 }    
                 session[shopNumber][phoneNumber].question_id = "99"
-                session[shopNumber][phoneNumber].question = "Baik Kak, apakah ada yang dapat saya bantu lagi?\n1. Berbicara dengan Customer Service\n2. Kembali ke Menu Utama\n3. Tidak terima kasih"
+                session[shopNumber][phoneNumber].question = "Apakah terdapat kendala?\n\n1. Ya\n2. Tidak, Kembali ke Menu Utama"
                 session[shopNumber][phoneNumber].answer_option = "option"
-                session[shopNumber][phoneNumber].option = ["2"]
+                session[shopNumber][phoneNumber].option = ["1","2"]
                 return
             }
         }catch(e){}
@@ -286,7 +346,7 @@ function createClient(clientId) {
                     fs.writeFileSync(filePath, media.data, 'base64');
                     console.log(`File tersimpan di: ${filePath}`);
 
-                    const transaction_code = uuidv4();
+                    const transaction_code = generateCustomId();
 
                     // Kalau mau lanjut upload ke API dengan form-data
                     const form = new FormData();
@@ -297,6 +357,7 @@ function createClient(clientId) {
                     form.append('id_promo', 0);
                     form.append('customer_name', session[shopNumber][phoneNumber].name);
                     form.append('email_customer', session[shopNumber][phoneNumber].email);
+                    form.append('id_payment', session[shopNumber][phoneNumber].id_payment);
                     form.append('phone_customer', phoneNumber);
                     form.append('transaction_code', transaction_code);
                     form.append('payment_status', "PENDING");
@@ -320,6 +381,7 @@ function createClient(clientId) {
                         await msg.reply('Gagal mengirim gambar ke server.');
                     }
                 }else{
+                    await sleep(10000)
                     await chat.sendMessage("MOHON KIRIMKAN BUKTI TRANSFER ANDA")
                     return
                 }
@@ -350,41 +412,62 @@ function createClient(clientId) {
                 }else{
                     return
                 }
-            }else if(session[shopNumber][phoneNumber].question_id === "16" && text === "1"){
-                csSession.add(phoneNumber)
+            }else if(cekFormat16(session[shopNumber][phoneNumber].question_id)){
+                if(text.toLowerCase() === "mau upgrade"){
+                    await sleep(10000)
+                    await chat.sendMessage("1. Pembelian by Whatsapp/Website\n2. Pembelian by Shopee/Sumber Lain\n\n0. Kembali ke Menu Utama");
+                    session[shopNumber][phoneNumber].question_id = "22"
+                    session[shopNumber][phoneNumber].question = "1. Pembelian by Whatsapp/Website\n2. Pembelian by Shopee/Sumber Lain\n\n0. Kembali ke Menu Utama"
+                    session[shopNumber][phoneNumber].answer_option = "option"
+                    session[shopNumber][phoneNumber].option = ["1","2","0"]
+                    return
+                }else if(cekFormatCS(text)){
+                    csSession.add(phoneNumber)
+                    await sleep(10000)
+                    chat.sendMessage("Baik, sedang disambungkan ke CS, mohon ditunggu.")
+                    return
+                }
 
-                chat.sendMessage("Baik, sedang disambungkan ke CS, mohon ditunggu.")
+            }else if(session[shopNumber][phoneNumber].question_id === "23"){
+                if(isValidEmail(text)){                    
+                    csSession.add(phoneNumber)
+                    await sleep(10000)
+                    chat.sendMessage("Baik, sedang disambungkan ke CS, mohon ditunggu.")
+                }else{
+                    await sleep(10000)
+                    chat.sendMessage("Mohon masukan format email yang benar.")
+                }
 
                 return
-            }else if(session[shopNumber][phoneNumber].question_id === "99" && text === "1"){
-                csSession.add(phoneNumber)
+            // }else if(session[shopNumber][phoneNumber].question_id === "99" && text === "1"){
+            //     csSession.add(phoneNumber)
+            //     await sleep(10000)
+            //     chat.sendMessage("Baik, sedang disambungkan ke CS, mohon ditunggu.")
 
-                chat.sendMessage("Baik, sedang disambungkan ke CS, mohon ditunggu.")
+            //     return
+            // }else if(session[shopNumber][phoneNumber].question_id === "99" && text === "3"){
+            //     delete session[shopNumber][phoneNumber]
 
-                return
-            }else if(session[shopNumber][phoneNumber].question_id === "99" && text === "3"){
-                delete session[shopNumber][phoneNumber]
+            //     const textEnd = `Terima kasih telah menggunakan layanan kami, ditunggu orderan lainnya:)\n\nKami menyediakan berbagai akun premium lainnya dan terdapat banyak promo menarik yang dapat diakses pada: https://temangabutmu.com/ \n\nSalam Hangat, Golden Digital:`
+            //     await sleep(10000)
+            //     chat.sendMessage(textEnd)
 
-                const textEnd = `Terima kasih telah menggunakan layanan kami, ditunggu orderan lainnya:)\n\nKami menyediakan berbagai akun premium lainnya dan terdapat banyak promo menarik yang dapat diakses pada: https://temangabutmu.com/ \n\nSalam Hangat, Golden Digital:`
-
-                chat.sendMessage(textEnd)
-
-                return
+            //     return
             }
         }
 
         
 
-        // if(listNumber.includes(phoneNumber)){
-        if (!onConv.has(phoneNumber)){
-            onConv.add(phoneNumber)
-            await handleMessages(msg)
-            onConv.delete(phoneNumber)
-        }
+        if(listNumber.includes(phoneNumber)){
+            if (!onConv.has(phoneNumber)){
+                onConv.add(phoneNumber)
+                await handleMessages(msg)
+                onConv.delete(phoneNumber)
+            }
             
-        // }else{
-        //     return "Customer Is Blocked"
-        // }
+        }else{
+            return "Customer Is Blocked"
+        }
         // if (!onConv.has(phoneNumber)){
         //     onConv.add(phoneNumber)
         //     await handleMessages(msg)
@@ -760,7 +843,7 @@ app.listen(port, () => {
 
 cron.schedule('* * * * *', () => {
     console.log('Cron job berjalan setiap menit');
-    const treshHold = Date.now() - 60 * 60 * 1000;
+    const treshHold = Date.now() - 5 * 60 * 1000;
     // Iterasi melalui session dan hapus key yang updated_at > 1 jam
     
     for (const keys in session) {

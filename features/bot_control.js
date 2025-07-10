@@ -5,6 +5,19 @@ const { v4: uuidv4 } = require('uuid');
 const flowBot = require('./flow_bot');
 const questionList = require('./question');
 
+function formatNetflixText(rawHtml) {
+  const text = convert(rawHtml, {
+    wordwrap: false,
+    selectors: [
+      { selector: 'a', options: { ignoreHref: true } },
+      { selector: 'p', format: 'paragraph' },
+      { selector: 'br', format: 'lineBreak' }
+    ]
+  });
+
+  return text.trim();
+}
+
 // Email validation function
 function isValidEmail(email) {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -85,7 +98,7 @@ function redeemShopee(code) {
 
 // Main bot control function
 async function botControl(body, shopNumber) {
-    let { question_id, answer, number, variant, produk_id, produk_name, name,email, price, produk_code,upgrade } = body;
+    let { question_id, answer, number, variant, produk_id, produk_name, name,email, id_payment, price, produk_code,upgrade } = body;
 
     let response = {
         question_id: "",
@@ -97,6 +110,7 @@ async function botControl(body, shopNumber) {
         media_path: "",
         name,
         email,
+        id_payment,
         upgrade,
         variant,
         produk_id,
@@ -214,7 +228,7 @@ async function botControl(body, shopNumber) {
                 const pesan = data_cred.matching_account[0].template
                 
                 next_question_id = "99"
-                response.message = pesan
+                response.message = formatNetflixText(pesan)
             }
 
             // if(response.message.message === "benar"){
@@ -255,7 +269,7 @@ async function botControl(body, shopNumber) {
         response.question_id = next_question_id;
         response.question = questionList[next_question_id].replace("{variant}", item_option).replace("\\n", "\n");
         response.answer_option = "option";
-        response.option = variantIdList.map(String);
+        response.option = [...variantIdList.map(String),"0"];
     } else if (nextAnswerList.includes("produk")) {
         const getProduk = await fetchData("https://devgoldendigital.my.id/api/get_detail_products/variance/"+response.variant);
         // console.log("https://devgoldendigital.my.id/api/get_detail_products/variance/"+response.variant);
@@ -354,6 +368,7 @@ async function botControl(body, shopNumber) {
 
         const qris = payments.data.find(item => item.nama_payment === "QRIS");
         const qrisImage = qris ? qris.image : null;
+        response.id_payment = qris ? qris.id : null
         console.log(qrisImage);
         
         response.media_type = "image;url"

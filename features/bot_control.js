@@ -376,8 +376,10 @@ async function botControl(body, shopNumber) {
     }
 
     if(next_question_id === "3"){
-        response.media_type = "image"
-        response.media_path = "assets/images/perbedaan.jpg"
+        if(response.variant === "Netflix"){
+            response.media_type = "image"
+            response.media_path = "assets/images/perbedaan.jpg"
+        }
     // }else if(next_question_id === "6"){
     //     response.media_type = "image"
     //     response.media_path = "assets/images/logo.jpg"

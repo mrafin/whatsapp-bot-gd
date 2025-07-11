@@ -58,6 +58,7 @@ async function postData(url, body) {
 
 const clients = {};
 const qrCodes = {};
+const lastChat = {};
 
 const onConv = new Set()
 const csSession = new Set()
@@ -147,7 +148,12 @@ function createClient(clientId) {
         console.log(2);
         let phoneNumber = cmd[0];
         let shopNumber = cmd1[0];
-        // const listNumber = ["628977548890"]
+
+        if (!Object.prototype.hasOwnProperty.call(lastChat, shopNumber)) {
+            lastChat[shopNumber] = {};
+        }
+        lastChat[shopNumber][phoneNumber] = new Date()
+        // const listNumber = ["6282245083753"]
 
         // if(!listNumber.includes(phoneNumber)){
         //     return
@@ -459,20 +465,20 @@ function createClient(clientId) {
         
 
         // if(listNumber.includes(phoneNumber)){
-            if (!onConv.has(phoneNumber)){
-                onConv.add(phoneNumber)
-                await handleMessages(msg)
-                onConv.delete(phoneNumber)
-            }
+        //     if (!onConv.has(phoneNumber)){
+        //         onConv.add(phoneNumber)
+        //         await handleMessages(msg)
+        //         onConv.delete(phoneNumber)
+        //     }
             
         // }else{
         //     return "Customer Is Blocked"
         // }
-        // if (!onConv.has(phoneNumber)){
-        //     onConv.add(phoneNumber)
-        //     await handleMessages(msg)
-        //     onConv.delete(phoneNumber)
-        // }
+        if (!onConv.has(phoneNumber)){
+            onConv.add(phoneNumber)
+            await handleMessages(msg)
+            onConv.delete(phoneNumber)
+        }
         
 
     });
@@ -850,7 +856,7 @@ cron.schedule('* * * * *', () => {
         for(const key in session[keys]){
             console.log(key);
             console.log(treshHold);
-            if (session[keys][key].updated_at < treshHold) {
+            if (lastChat[keys][key] < treshHold) {
                 console.log(`Menghapus session: ${key}`);
                 delete session[keys][key];
                 onConv.delete(key)

@@ -427,7 +427,7 @@ function createClient(clientId) {
                     session[shopNumber][phoneNumber].answer_option = "option"
                     session[shopNumber][phoneNumber].option = ["1","2","0"]
                     return
-                }else if(cekFormatCS(text)){
+                }else if(text.toLowerCase() === "hubungi cs"){
                     csSession.add(phoneNumber)
                     await sleep(10000)
                     chat.sendMessage("Baik, sedang disambungkan ke CS, mohon ditunggu.")

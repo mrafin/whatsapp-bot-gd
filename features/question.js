@@ -32,17 +32,11 @@ const questionList = {
 - ⁠Jika ada keterangan Something went wrong / terjadi kesalahan, harap dijeda untuk login karena sharing rawan kena Spam login atau gantian login dengan customer lain
 - ⁠jika di rasa  terlalu lama untuk login DI sarankan UPGRADE KE PRIVATE  SUPAYA MENIKMATI LAYANAN TERBAIK DARI KAMI,BIOSKOP AJA 35k 1film disini cukup private. (CUKUP KETIK MAU UPGRADE)
 - ⁠Jika masih belom bisa hub CUSTOMER SERVICE dengan mengisi formulir berikut
-PRODUK YANG DI BELI 	:
-VARIAN*
-EMAIL AKUN PRODUK	:
-* JIKA ADA, SHARING/PRIVATE`, 
+(KETIK SAJA HUBUNGI CS)`, 
     "1612":`- Pastikan  menggunakan paket data / hotspot untuk login pertama kali, bukan Wi-Fi rumah
 - Jika ingin login di TV dan tidak bisa login, harap loginkan di HP terlebih dahulu, lalu pilih login dengan ponsel di HP dan scan barcode yang ditampilkan.
 - Jika masih tidak bisa, hubungi customer service.
-PRODUK YANG DI BELI 	:
-VARIAN*
-EMAIL AKUN PRODUK	:
-* JIKA ADA, SHARING/PRIVATE
+(KETIK SAJA HUBUNGI CS)
 `,
     "1613":`- Menunggu user lain selesai nonton
 - Jika login di HP/TAB bisa di download film dan ditonton di mode offline (matikan internet)
@@ -52,49 +46,31 @@ EMAIL AKUN PRODUK	:
     "1614":`- Tunggu 10-15 menit
 - Jika masih belum bisa, hubungi customer service
 (CUKUP KETIK MAU UPGRADE)
-PRODUK YANG DI BELI 	:
-VARIAN*
-EMAIL AKUN PRODUK	:
-* JIKA ADA, SHARING/PRIVATE
+(KETIK SAJA HUBUNGI CS)
 
 `,
     "1615":`Hubungi customer service
-PRODUK YANG DI BELI 	:
-VARIAN*
-EMAIL AKUN PRODUK	:
-* JIKA ADA, SHARING/PRIVATE
+(KETIK SAJA HUBUNGI CS)
 `,
     "1616":`- Pastikan akun Netflix yang digunakan tidak dalam masa berlangganan yang sudah habis. Durasi Netflix sesuai Snk yaitu 27-30 Hari. 
 - Jika masa berlangganan masih ada, klik X/not now /nanti, lalu lanjutkan menonton
 - Jika masa berlangganan masih ada dan tidak bisa di klik Nanti, hubungi customer service.
-PRODUK YANG DI BELI 	:
-VARIAN*
-EMAIL AKUN PRODUK	:
-* JIKA ADA, SHARING/PRIVATE
+(KETIK SAJA HUBUNGI CS)
 
 `,
     "1617":`- klik i’m traveling/saya sedang berpergian/tonton sementara
 - klik kirim email dan minta kode OTP ke customer service
-PRODUK YANG DI BELI 	:
-VARIAN*
-EMAIL AKUN PRODUK	:
-* JIKA ADA, SHARING/PRIVATE
+(KETIK SAJA HUBUNGI CS)
 
 `,
     "162":`hub customer service karena akunya sudah tidak premium, dengan mengisi formulir berikut
-PRODUK YANG DI BELI 	:
-VARIAN*
-EMAIL AKUN PRODUK	:
-* JIKA ADA, SHARING/PRIVATE
+(KETIK SAJA HUBUNGI CS)
 `,
     "163":"1. Kendala tidak bisa login/salah sandi paket sharing dan private\n2. Kendala Screen Limit/batasan menonton paket Sharing\n\n0. Kembali ke Menu Utama",
     "1631":`- Pastikan  menggunakan paket data / hotspot untuk login pertama kali, bukan Wi-Fi rumah.
 - Jika sudah menggunakan paket data dan belum bisa login, re install aplikasi vidio kemudian login
 - jika cara A dan B masih belom bisa Hub customer service
-PRODUK YANG DI BELI 	:
-VARIAN*
-EMAIL AKUN PRODUK	:
-* JIKA ADA, SHARING/PRIVATE
+(KETIK SAJA HUBUNGI CS)
 `,
     "1632":`- Menunggu user lain selesai nonton
 - Jika login di HP/TAB bisa di download film dan ditonton di mode offline (matikan internet)
@@ -104,18 +80,12 @@ EMAIL AKUN PRODUK	:
     "164":`*Kendala tidak bisa login*
 Pastikan pilih halaman masuk di pojok  kanan (bukan daftar)
 Jika  masih tidak bisa hub customer service
-PRODUK YANG DI BELI 	:
-VARIAN*
-EMAIL AKUN PRODUK	:
-* JIKA ADA, SHARING/PRIVATE
+(KETIK SAJA HUBUNGI CS)
 
 `,
     "165":`*Kendala akun tidak premium lagi*
 hub customer service karena akunya sudah tidak premium, dengan mengisi formulir berikut
-PRODUK YANG DI BELI 	:
-VARIAN*
-EMAIL AKUN PRODUK	:
-* JIKA ADA, SHARING/PRIVATE
+(KETIK SAJA HUBUNGI CS)
 
 `,
 "166":"1. Kendala undangan premium tidak masuk di inbox\n2. Sudah terima undangan tapi masih ada iklan atau tidak premium\n3. Kendala akun tidak premium lag\n\n0. Kembali ke Menu Utama",
@@ -123,34 +93,22 @@ EMAIL AKUN PRODUK	:
 - cek di folder spam kalau tidak ada di inbox
 - cek semua folder bisa tidak ada di spam juga
 - kalau masih tidak ada hub customer service
-PRODUK YANG DI BELI 	:
-VARIAN*
-EMAIL AKUN PRODUK	:
-* JIKA ADA, SHARING/PRIVATE
+(KETIK SAJA HUBUNGI CS)
 
 `,
 "1662":`- pastikan email yg di premiumkan belum pernah premium sebelumnya
 - dalam setahun email hanya bis di premiumkan family 1x saja
 - jika sudah terlanjur hubungi customer service dengan kasih alamat email baru yang belum pernah premium sebelumnya dengan mengisi formulir berikut
-PRODUK YANG DI BELI 	:
-VARIAN*
-EMAIL AKUN PRODUK	:
-* JIKA ADA, SHARING/PRIVATE
+(KETIK SAJA HUBUNGI CS)
 
 `,
 "1663":`hub custimer cervice karena akunya sudah tidak premium, dengan mengisi 
-PRODUK YANG DI BELI 	:
-VARIAN*
-EMAIL AKUN PRODUK	:
-* JIKA ADA, SHARING/PRIVATE 
+(KETIK SAJA HUBUNGI CS) 
 `,
 "167":`- Jika ada tanda trailer itu bearti episode atau film tersebut belum rilis dari pihak we tv, solusi di tunggu samapai pihak we tvnya merilis film atau episode ter sebut
 - Jika ada tanda express di salah satu episode itu harus membayar untuk menonoton episode tersebut
 - Jika film atau series bertanda VIP tidka bisa di tonton hub customer service dengan mengisi formulir berikut
-PRODUK YANG DI BELI 	:
-VARIAN*
-EMAIL AKUN PRODUK	:
-* JIKA ADA, SHARING/PRIVATE
+(KETIK SAJA HUBUNGI CS)
 
 `,
 "168":`- Video Tidak Merespons
@@ -160,10 +118,7 @@ EMAIL AKUN PRODUK	:
 - Konten Tidak Tersedia
   a. Beberapa judul mungkin tidak tersedia di wilayah indonesia atau telah dihapus dari layanan. Coba periksa ketersediaan konten di Prime Video
 -Jika masih belom bisa hub CUSTOMER SERVICE
-PRODUK YANG DI BELI 	:
-VARIAN*
-EMAIL AKUN PRODUK	:
-* JIKA ADA, SHARING/PRIVATE
+(KETIK SAJA HUBUNGI CS)
 
 
 `,
@@ -176,18 +131,12 @@ EMAIL AKUN PRODUK	:
 - Kendala tidak bisa login dari HP
   a. instal ulang aplikasi  terlebih dahulu
 - Jika masih belom bisa hub CUSTOMER SERVICE
-PRODUK YANG DI BELI 	:
-VARIAN*
-EMAIL AKUN PRODUK	:
-* JIKA ADA, SHARING/PRIVATE
+(KETIK SAJA HUBUNGI CS)
 `,
 "16-10":`- Aplikasi tidak mau terbuka atau tidak bisa mengunduh
   a. Mulai ulang perangkat, perbarui aplikasi, hapus cache, atau coba instal ulang aplikasi
 - Jika masih belom bisa hub CUSTOMER SERVICE
-PRODUK YANG DI BELI 	:
-VARIAN*
-EMAIL AKUN PRODUK	:
-* JIKA ADA, SHARING/PRIVATE
+(KETIK SAJA HUBUNGI CS)
 
 `,
 "16-11":`- Kendala tidak bisa login 
@@ -199,17 +148,11 @@ EMAIL AKUN PRODUK	:
 - Kendala Screen Limit private 
   a. clear chache aplikasi terlebih dahulu baru login kembali, dikarenakan ada bug dari visionnya
 - jika masih tidak bisa hubungi Customer Service
-PRODUK YANG DI BELI 	:
-VARIAN*
-EMAIL AKUN PRODUK	:
-* JIKA ADA, SHARING/PRIVATE
+(KETIK SAJA HUBUNGI CS)
 
 `,
 "16-12":`Hubungi customer service dengan format berikut:
-PRODUK YANG DI BELI 	:
-VARIAN*
-EMAIL AKUN PRODUK	:
-* JIKA ADA, SHARING/PRIVATE
+(KETIK SAJA HUBUNGI CS)
 
 `,
     "17":"0. Kembali ke Menu Utama ",

@@ -26,7 +26,7 @@ const questionList = {
     //"15":"Email produk sharing yang Anda kirim tidak ditemukan. Mohon kirim kembali email produk dengan benar.",
     "15":"Total: Rp {price}\nSilahkan transfer menggunakan QRIS berikut",
     "16":"Pilih jenis\n1. Netflix\n2. spoitify\n3. Vidio\n4. Viu\n5. Canva\n6. youtube\n7. We tv\n8. Prime vidio\n9. Capcut\n10. HBO\n11. Vision+\n12. Aplikasi lainya\n\n0. Kembali ke Menu Utama",
-    "161":`1. Kendala tidak bisa login/salah sandi paket sharing \n2. Kendala tidak bisa login/salah sandi paket Private\n3. Kendala Screen Limit paket Sharing\n4. Kendala Screen Limit  paket Private\n5. Kendala Screen Limit paket Platinum\n6. Kendala Pembayaran Gagal di Netflix / perbarui pembayaran\n7. perbarui alamat rumah/household/Netflix  mu bukan bagian dari rumah ini\n\n0. Kembali ke Menu Utama`,
+    "161":`1. Kendala dalam mengatur pin\n2. Kendala tidak bisa login/salah sandi paket sharing \n3. Kendala tidak bisa login/salah sandi paket Private\n4. Kendala Screen Limit paket Sharing\n5. Kendala Screen Limit  paket Private\n6. Kendala Screen Limit paket Platinum\n7. Kendala Pembayaran Gagal di Netflix / perbarui pembayaran\n8. perbarui alamat rumah/household/Netflix  mu bukan bagian dari rumah ini\n\n0. Kembali ke Menu Utama`,
     "1611":`- Pastikan  menggunakan paket data / hotspot untuk login pertama kali, bukan Wi-Fi rumah.
 - Jika sudah menggunakan paket data dan belum bisa login, coba tunggu 15-60 menit lalu login ulang
 - ⁠Jika ada keterangan Something went wrong / terjadi kesalahan, harap dijeda untuk login karena sharing rawan kena Spam login atau gantian login dengan customer lain

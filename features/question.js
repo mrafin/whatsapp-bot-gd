@@ -1,5 +1,5 @@
 const questionList = {
-    "1":"Selamat Datang di Temangabutmu.\nTerima kasih telah menghubungi kami.\nUntuk info promo dapat dilihat pada website kami:\nhttps://temangabutmu.com/ \nSilahkan memilih kebutuhan Anda:\n1. Lihat Katalog (Pembelian melalui Whatsapp)\n2. Upgrade Pembelian\n3. Informasi dan Kendala\n4. Join member temangabutmu (Pembelian melalui Website)\n5. Cek transaksi yang telah dibeli",
+    "1":"Selamat Datang di Temangabutmu.\nTerima kasih telah menghubungi kami.\nUntuk info promo dapat dilihat pada website kami:\nhttps://temangabutmu.com/ \nSilahkan memilih kebutuhan Anda: (CUKUP KETIK ANGKA UNTUK MELANJUTKAN)\n1. Lihat Katalog (Pembelian melalui Whatsapp)\n2. Upgrade Pembelian\n3. Informasi dan Kendala\n4. Join member temangabutmu (Pembelian melalui Website)\n5. Cek transaksi yang telah dibeli",
     "10":"Silahkan kirim format pemesanan dari Admin Shopee/Lazada/Itemku.\n\n0. Kembali ke Menu Utama",
     "2":"Silahkah pilih menu:\n{variant}\n\n0. Kembali ke menu utama",
     "3":"Berikut pricelist {variant}:\n{produk}\n0. Kembali ke menu utama",

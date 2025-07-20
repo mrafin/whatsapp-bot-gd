@@ -256,8 +256,8 @@ function createClient(clientId) {
         try{
 
             if(text.includes(claim_template)){
-                const get_uuid = text.match(/[A-Za-z0-9]{12}/);
-                const claim_code = get_uuid[0]
+                const get_uuid = text.match(/kode transaksi\s+(\S+)/i)
+                const claim_code = get_uuid[1].trim()
     
                 const data_cred = await postData("https://devgoldendigital.my.id/api/transactions/claim_transaction_code", {transaction_code:claim_code})
                 // const data_cred = await postData("http://127.0.0.1:8000/api/transactions/claim_code", {transaction_code:claim_code})

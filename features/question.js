@@ -7,7 +7,7 @@ const questionList = {
     "19":"Silahkan masukkan email Anda\n\n0. Kembali ke Menu Utama",
     "20":"Registrasikan diri Anda menjadi member Temangabutmu dan lakukan transaksi untuk mendapatkan poin member melalui:\nhttps://temangabutmu.com/\n\n0. Kembali ke Menu Utama",
     "21":"{template_history}",
-    "22":"1. Pembelian by Whatsapp/Website\n2. Pembelian by Shopee/Sumber Lain\n\n0. Kembali ke Menu Utama",
+    "22":"1. Pembelian sebelumnya dari Whatsapp/Website\n2. Pembelian sebelumnya dari  Shopee/Sumber Lain\n\n0. Kembali ke Menu Utama",
     "23":"Mohon masukan email akun anda sebelumnya\n\n0. Kembali ke Menu Utama",
     
     

@@ -209,7 +209,7 @@ function createClient(clientId) {
                         const pesan = data_cred.matching_account[0].template
                         await sleep(10000)
                         await chat.sendMessage(formatNetflixText(pesan))
-                        await chat.sendMessage("MOHON KONFIRMASI PENGIRIMAN SETELAH 24 JAM DAN ULASAN PRODUK BINTANG 5 UNTUK SYARAT FULLGARANSI!\nApakah terdapat kendala?\n\n1. Ya\n2. Tidak, Kembali ke Menu Utama");
+                        await chat.sendMessage("MOHON KONFIRMASI PENGIRIMAN SETELAH 24 JAM DAN ULASAN PRODUK BINTANG 5 UNTUK SYARAT FULLGARANSI!\nApakah terdapat kendala? (CUKUP KETIK ANGKA UNTUK MELANJUTKAN)\n\n1. Ya\n2. Tidak, Kembali ke Menu Utama");
                         
                         // Check if the session object for the shopNumber and custNumber exists
                         if (!Object.prototype.hasOwnProperty.call(session, shopNumber)) {
@@ -238,7 +238,7 @@ function createClient(clientId) {
                             };
                         }    
                         session[shopNumber][phoneNumber].question_id = "99"
-                        session[shopNumber][phoneNumber].question = "MOHON KONFIRMASI PENGIRIMAN SETELAH 24 JAM DAN ULASAN PRODUK BINTANG 5 UNTUK SYARAT FULLGARANSI!\nApakah terdapat kendala?\n\n1. Ya\n2. Tidak, Kembali ke Menu Utama"
+                        session[shopNumber][phoneNumber].question = "MOHON KONFIRMASI PENGIRIMAN SETELAH 24 JAM DAN ULASAN PRODUK BINTANG 5 UNTUK SYARAT FULLGARANSI!\nApakah terdapat kendala? (CUKUP KETIK ANGKA UNTUK MELANJUTKAN)\n\n1. Ya\n2. Tidak, Kembali ke Menu Utama"
                         session[shopNumber][phoneNumber].answer_option = "option"
                         session[shopNumber][phoneNumber].option = ["1","2"]
                         return
@@ -276,7 +276,7 @@ function createClient(clientId) {
     
                 await sleep(10000)
                 await chat.sendMessage(formatNetflixText(pesan))
-                await chat.sendMessage("Apakah terdapat kendala?\n\n1. Ya\n2. Tidak, Kembali ke Menu Utama");
+                await chat.sendMessage("Apakah terdapat kendala? (CUKUP KETIK ANGKA UNTUK MELANJUTKAN)\n\n1. Ya\n2. Tidak, Kembali ke Menu Utama");
                 // Check if the session object for the shopNumber and custNumber exists
                 if (!Object.prototype.hasOwnProperty.call(session, shopNumber)) {
                     session[shopNumber] = {};
@@ -304,7 +304,7 @@ function createClient(clientId) {
                     };
                 }    
                 session[shopNumber][phoneNumber].question_id = "99"
-                session[shopNumber][phoneNumber].question = "Apakah terdapat kendala?\n\n1. Ya\n2. Tidak, Kembali ke Menu Utama"
+                session[shopNumber][phoneNumber].question = "Apakah terdapat kendala? (CUKUP KETIK ANGKA UNTUK MELANJUTKAN)\n\n1. Ya\n2. Tidak, Kembali ke Menu Utama"
                 session[shopNumber][phoneNumber].answer_option = "option"
                 session[shopNumber][phoneNumber].option = ["1","2"]
                 return

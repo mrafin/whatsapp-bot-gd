@@ -154,11 +154,11 @@ function createClient(clientId) {
             lastChat[shopNumber] = {};
         }
         lastChat[shopNumber][phoneNumber] = new Date()
-        const listNumber = ["6282245083753"]
+        // const listNumber = ["6282245083753"]
 
-        if(!listNumber.includes(phoneNumber)){
-            return
-        }
+        // if(!listNumber.includes(phoneNumber)){
+        //     return
+        // }
         
         if(phoneNumber === "status"){
             return
@@ -465,21 +465,21 @@ function createClient(clientId) {
 
         
 
-        if(listNumber.includes(phoneNumber)){
-            if (!onConv.has(phoneNumber)){
-                onConv.add(phoneNumber)
-                await handleMessages(msg)
-                onConv.delete(phoneNumber)
-            }
+        // if(listNumber.includes(phoneNumber)){
+        //     if (!onConv.has(phoneNumber)){
+        //         onConv.add(phoneNumber)
+        //         await handleMessages(msg)
+        //         onConv.delete(phoneNumber)
+        //     }
             
-        }else{
-            return "Customer Is Blocked"
-        }
-        // if (!onConv.has(phoneNumber)){
-        //     onConv.add(phoneNumber)
-        //     await handleMessages(msg)
-        //     onConv.delete(phoneNumber)
+        // }else{
+        //     return "Customer Is Blocked"
         // }
+        if (!onConv.has(phoneNumber)){
+            onConv.add(phoneNumber)
+            await handleMessages(msg)
+            onConv.delete(phoneNumber)
+        }
         
 
     });
@@ -500,7 +500,12 @@ function autoLoadClients() {
 
     clientIds.forEach(clientId => {
         console.log(`Auto-loading client: ${clientId.split("-")[1]}`);
-        createClient(clientId.split("-")[1]);
+        try{
+
+            createClient(clientId.split("-")[1]);
+        }catch{
+            
+        }
     });
 }
 

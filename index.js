@@ -189,7 +189,7 @@ function createClient(clientId) {
                     console.log(data_cred);
                     if(data_cred.matching_account.length === 0){
                         await sleep(10000)
-                        chat.sendMessage(`Transaksi masih dalam proses, mohon ditunggu.`)
+                        chat.sendMessage(`Transaksi masih dalam proses, mohon ditunggu. Mohon kirim ulang format klaim akun per menit.`)
                         return
                     }else{
                         const bodyClaimShopee = {
@@ -265,7 +265,7 @@ function createClient(clientId) {
                 // console.log(data_cred);
                 if(data_cred === null){
                     await sleep(10000)
-                    chat.sendMessage(`Transaksi masih dalam proses, mohon ditunggu.`)
+                    chat.sendMessage(`Transaksi masih dalam proses, mohon ditunggu. Mohon kirim ulang format klaim akun per menit.`)
                     return
                 }
     
@@ -419,12 +419,12 @@ function createClient(clientId) {
                 }else{
                     return
                 }
-            }else if(cekFormat16(session[shopNumber][phoneNumber].question_id)){
+            }else if(session[shopNumber][phoneNumber].question_id){
                 if(text.toLowerCase() === "mau upgrade"){
                     await sleep(10000)
-                    await chat.sendMessage("1. Pembelian by Whatsapp/Website\n2. Pembelian by Shopee/Sumber Lain\n\n0. Kembali ke Menu Utama");
+                    await chat.sendMessage("1. Pembelian sebelumnya dari Whatsapp/Website\n2. Pembelian sebelumnya dari  Shopee/Sumber Lain\n\n0. Kembali ke Menu Utama");
                     session[shopNumber][phoneNumber].question_id = "22"
-                    session[shopNumber][phoneNumber].question = "1. Pembelian by Whatsapp/Website\n2. Pembelian by Shopee/Sumber Lain\n\n0. Kembali ke Menu Utama"
+                    session[shopNumber][phoneNumber].question = "1. Pembelian sebelumnya dari Whatsapp/Website\n2. Pembelian sebelumnya dari  Shopee/Sumber Lain\n\n0. Kembali ke Menu Utama"
                     session[shopNumber][phoneNumber].answer_option = "option"
                     session[shopNumber][phoneNumber].option = ["1","2","0"]
                     return

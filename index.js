@@ -154,11 +154,11 @@ function createClient(clientId) {
             lastChat[shopNumber] = {};
         }
         lastChat[shopNumber][phoneNumber] = new Date()
-        // const listNumber = ["6282245083753"]
+        const listNumber = ["6282245083753"]
 
-        // if(!listNumber.includes(phoneNumber)){
-        //     return
-        // }
+        if(!listNumber.includes(phoneNumber)){
+            return
+        }
         
         if(phoneNumber === "status"){
             return
@@ -419,7 +419,7 @@ function createClient(clientId) {
                 }else{
                     return
                 }
-            }else if(session[shopNumber][phoneNumber].question_id){
+            }else if(session[shopNumber][phoneNumber].question_id != ""){
                 if(text.toLowerCase() === "mau upgrade"){
                     await sleep(10000)
                     await chat.sendMessage("1. Pembelian sebelumnya dari Whatsapp/Website\n2. Pembelian sebelumnya dari  Shopee/Sumber Lain\n\n0. Kembali ke Menu Utama");
@@ -465,21 +465,21 @@ function createClient(clientId) {
 
         
 
-        // if(listNumber.includes(phoneNumber)){
-        //     if (!onConv.has(phoneNumber)){
-        //         onConv.add(phoneNumber)
-        //         await handleMessages(msg)
-        //         onConv.delete(phoneNumber)
-        //     }
+        if(listNumber.includes(phoneNumber)){
+            if (!onConv.has(phoneNumber)){
+                onConv.add(phoneNumber)
+                await handleMessages(msg)
+                onConv.delete(phoneNumber)
+            }
             
-        // }else{
-        //     return "Customer Is Blocked"
-        // }
-        if (!onConv.has(phoneNumber)){
-            onConv.add(phoneNumber)
-            await handleMessages(msg)
-            onConv.delete(phoneNumber)
+        }else{
+            return "Customer Is Blocked"
         }
+        // if (!onConv.has(phoneNumber)){
+        //     onConv.add(phoneNumber)
+        //     await handleMessages(msg)
+        //     onConv.delete(phoneNumber)
+        // }
         
 
     });
@@ -875,6 +875,7 @@ app.listen(port, () => {
 cron.schedule('* * * * *', () => {
     console.log('Cron job berjalan setiap menit');
     const treshHold = Date.now() - 5 * 60 * 1000;
+    const sessionTreshHold = Date.now() - 30 * 60 * 1000;
     // Iterasi melalui session dan hapus key yang updated_at > 1 jam
     
     for (const keys in session) {
@@ -885,6 +886,7 @@ cron.schedule('* * * * *', () => {
                 console.log(`Menghapus session: ${key}`);
                 delete session[keys][key];
                 onConv.delete(key)
+            }else if(lastChat[keys][key] < sessionTreshHold){
                 csSession.delete(key)
             }
         }

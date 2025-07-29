@@ -476,7 +476,7 @@ function createClient(clientId) {
             // }else{
             //     return "Customer Is Blocked"
             // }
-            if (!onConv.has(phoneNumber)){
+            if (!onConv.has(phoneNumber) && !csSession.has(phoneNumber)){
                 onConv.add(phoneNumber)
                 await handleMessages(msg)
                 onConv.delete(phoneNumber)

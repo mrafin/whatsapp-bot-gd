@@ -51,8 +51,14 @@ async function postData(url, body) {
     try {
         const response = await axios.post(url, body);
         return response.data;
-    } catch (error) {
-        console.error("Error posting data: -----------------------------------------------------------------------", error);
+    } catch (e) {
+        console.error("Error posting data: -----------------------------------------------------------------------", e);
+        const bodyError = {
+            "error_message": e.message,
+            "function_name": "UserController@store",
+            "level": "error"
+        }
+        await postData("https://devgoldendigital.my.id/api/v1/error-logs", bodyError)
         return null;
     }
 }
@@ -249,7 +255,12 @@ function createClient(clientId) {
                 }
             }catch(e){
                 console.log("Error parsing claim format: ", e);
-                
+                const bodyError = {
+                    "error_message": e.message,
+                    "function_name": "UserController@store",
+                    "level": "error"
+                }
+                await postData("https://devgoldendigital.my.id/api/v1/error-logs", bodyError)
             }
             
             
@@ -311,7 +322,14 @@ function createClient(clientId) {
                     session[shopNumber][phoneNumber].option = ["1","2"]
                     return
                 }
-            }catch(e){}
+            }catch(e){
+                const bodyError = {
+                    "error_message": e.message,
+                    "function_name": "UserController@store",
+                    "level": "error"
+                }
+                await postData("https://devgoldendigital.my.id/api/v1/error-logs", bodyError)
+            }
 
             if (!Object.prototype.hasOwnProperty.call(session, shopNumber)) {
                 session[shopNumber] = {};
@@ -384,9 +402,15 @@ function createClient(clientId) {
                             console.log('Upload sukses:', response.data.invoice.transaction_code);
                             await msg.reply(`Transaksi anda berhasil dibuat, mohon kirim kembali format chat dibawah ini:\n\n Halo, saya ingin klaim akun dengan kode transaksi ${response.data.invoice.transaction_code} \n\n format chat tersebut dikirim per menit hingga Anda mendapatkan akun Anda`);
                             return
-                        } catch (error) {
-                            console.error('Upload gagal:', error.message);
+                        } catch (e) {
+                            console.error('Upload gagal:', e.message);
                             await msg.reply('Gagal mengirim gambar ke server.');
+                            const bodyError = {
+                                "error_message": e.message,
+                                "function_name": "UserController@store",
+                                "level": "error"
+                            }
+                            await postData("https://devgoldendigital.my.id/api/v1/error-logs", bodyError)
                         }
                     }else{
                         await sleep(10000)
@@ -407,36 +431,22 @@ function createClient(clientId) {
                 return
             }
 
+            if(csSession.has(phoneNumber) ){
+                if(text.toLowerCase() === "kembali ke menu utama"){
+                    delete session[shopNumber][phoneNumber]
+                    csSession.delete(phoneNumber)
+                }else{
+                    return
+                }
+            }
+
             // Check if the session object for the shopNumber and custNumber exists
             if (!Object.prototype.hasOwnProperty.call(session, shopNumber)) {
                 session[shopNumber] = {};
             }
 
             if(Object.prototype.hasOwnProperty.call(session[shopNumber], phoneNumber)){
-                if(csSession.has(phoneNumber) ){
-                    if(text.toLowerCase() === "kembali ke menu utama"){
-                        delete session[shopNumber][phoneNumber]
-                        csSession.delete(phoneNumber)
-                    }else{
-                        return
-                    }
-                }else if(session[shopNumber][phoneNumber].question_id != ""){
-                    if(text.toLowerCase() === "mau upgrade"){
-                        await sleep(10000)
-                        await chat.sendMessage("1. Pembelian sebelumnya dari Whatsapp/Website\n2. Pembelian sebelumnya dari  Shopee/Sumber Lain\n\n0. Kembali ke Menu Utama");
-                        session[shopNumber][phoneNumber].question_id = "22"
-                        session[shopNumber][phoneNumber].question = "1. Pembelian sebelumnya dari Whatsapp/Website\n2. Pembelian sebelumnya dari  Shopee/Sumber Lain\n\n0. Kembali ke Menu Utama"
-                        session[shopNumber][phoneNumber].answer_option = "option"
-                        session[shopNumber][phoneNumber].option = ["1","2","0"]
-                        return
-                    }else if(text.toLowerCase() === "hubungi cs"){
-                        csSession.add(phoneNumber)
-                        await sleep(10000)
-                        chat.sendMessage("Baik, sedang disambungkan ke CS, mohon ditunggu.")
-                        return
-                    }
-
-                }else if(session[shopNumber][phoneNumber].question_id === "23"){
+                if(session[shopNumber][phoneNumber].question_id === "23"){
                     if(isValidEmail(text)){                    
                         csSession.add(phoneNumber)
                         await sleep(10000)
@@ -461,12 +471,30 @@ function createClient(clientId) {
                 //     chat.sendMessage(textEnd)
 
                 //     return
+                }else if(session[shopNumber][phoneNumber].question_id != ""){
+                    console.log("text111111111", text);
+                    
+                    if(text.toLowerCase() === "mau upgrade"){
+                        await sleep(10000)
+                        await chat.sendMessage("1. Pembelian sebelumnya dari Whatsapp/Website\n2. Pembelian sebelumnya dari  Shopee/Sumber Lain\n\n0. Kembali ke Menu Utama");
+                        session[shopNumber][phoneNumber].question_id = "22"
+                        session[shopNumber][phoneNumber].question = "1. Pembelian sebelumnya dari Whatsapp/Website\n2. Pembelian sebelumnya dari  Shopee/Sumber Lain\n\n0. Kembali ke Menu Utama"
+                        session[shopNumber][phoneNumber].answer_option = "option"
+                        session[shopNumber][phoneNumber].option = ["1","2","0"]
+                        return
+                    }else if(text.toLowerCase() === "hubungi cs"|text.toLowerCase() === "cs"){
+                        csSession.add(phoneNumber)
+                        await sleep(10000)
+                        chat.sendMessage("Baik, sedang disambungkan ke CS, mohon ditunggu.")
+                        return
+                    }
+
                 }
             }
 
             
 
-            // if(listNumber.includes(phoneNumber)){
+            // if(listNumber.includes(phoneNumber)&& !csSession.has(phoneNumber)){
             //     if (!onConv.has(phoneNumber)){
             //         onConv.add(phoneNumber)
             //         await handleMessages(msg)
@@ -484,7 +512,12 @@ function createClient(clientId) {
         
         }
         catch(e){
-            
+            const bodyError = {
+                "error_message": e.message,
+                "function_name": "UserController@store",
+                "level": "error"
+            }
+            await postData("https://devgoldendigital.my.id/api/v1/error-logs", bodyError)
         }
          
 
@@ -504,13 +537,19 @@ function autoLoadClients() {
         fs.statSync(path.join(authFolder, name)).isDirectory()
     );
 
-    clientIds.forEach(clientId => {
+    clientIds.forEach(async clientId => {
         console.log(`Auto-loading client: ${clientId.split("-")[1]}`);
         try{
 
             createClient(clientId.split("-")[1]);
-        }catch{
-            
+        }catch (e){
+            console.log(e);
+            const bodyError = {
+                "error_message": e.message,
+                "function_name": "UserController@store",
+                "level": "error"
+            }
+            await postData("https://devgoldendigital.my.id/api/v1/error-logs", bodyError)
         }
     });
 }

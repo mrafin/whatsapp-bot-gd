@@ -122,21 +122,21 @@ function createClient(clientId) {
 
     });
 
-    client.once('qr', async (qr) => {
+    client.on('qr', async (qr) => {
         const qrImage = await qrcode.toDataURL(qr);
         qrCodes[clientId] = qrImage;
         console.log(`QR untuk ${clientId} tersedia di /qrcode/${clientId}`);
     });
 
-    client.once('ready', () => {
+    client.on('ready', () => {
         console.log(`Client ${clientId} is ready!`);
     });
 
-    client.once('authenticated', () => {
+    client.on('authenticated', () => {
         console.log(`Client ${clientId} authenticated`);
     });
 
-    client.once('auth_failure', () => {
+    client.on('auth_failure', () => {
         console.log(`Client ${clientId} authentication failed`);
     });
 

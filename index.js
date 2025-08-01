@@ -109,6 +109,11 @@ function formatNetflixText(rawHtml) {
 
 
 function createClient(clientId) {
+    if (clients[clientId]) {
+        console.log(`Client ${clientId} sudah dibuat, skip`);
+        return clients[clientId];
+    }
+
     const client = new Client({
         authStrategy: new LocalAuth({ clientId }),
         puppeteer: {
@@ -117,21 +122,21 @@ function createClient(clientId) {
 
     });
 
-    client.on('qr', async (qr) => {
+    client.once('qr', async (qr) => {
         const qrImage = await qrcode.toDataURL(qr);
         qrCodes[clientId] = qrImage;
         console.log(`QR untuk ${clientId} tersedia di /qrcode/${clientId}`);
     });
 
-    client.on('ready', () => {
+    client.once('ready', () => {
         console.log(`Client ${clientId} is ready!`);
     });
 
-    client.on('authenticated', () => {
+    client.once('authenticated', () => {
         console.log(`Client ${clientId} authenticated`);
     });
 
-    client.on('auth_failure', () => {
+    client.once('auth_failure', () => {
         console.log(`Client ${clientId} authentication failed`);
     });
 

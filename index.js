@@ -58,10 +58,12 @@ async function postData(url, body) {
             "function_name": "UserController@store",
             "level": "error"
         }
-        await postData("https://devgoldendigital.my.id/api/v1/error-logs", bodyError)
+        await postData("https://devgoldendigital.my.id/api/error-logs", bodyError)
         return null;
     }
 }
+
+const listBot = ["bot-1", "bot-2","bot-3", "bot-4", "bot-5"]
 
 const clients = {};
 const qrCodes = {};
@@ -265,7 +267,7 @@ function createClient(clientId) {
                     "function_name": "UserController@store",
                     "level": "error"
                 }
-                await postData("https://devgoldendigital.my.id/api/v1/error-logs", bodyError)
+                await postData("https://devgoldendigital.my.id/api/error-logs", bodyError)
             }
             
             
@@ -333,7 +335,7 @@ function createClient(clientId) {
                     "function_name": "UserController@store",
                     "level": "error"
                 }
-                await postData("https://devgoldendigital.my.id/api/v1/error-logs", bodyError)
+                await postData("https://devgoldendigital.my.id/api/error-logs", bodyError)
             }
 
             if (!Object.prototype.hasOwnProperty.call(session, shopNumber)) {
@@ -415,7 +417,7 @@ function createClient(clientId) {
                                 "function_name": "UserController@store",
                                 "level": "error"
                             }
-                            await postData("https://devgoldendigital.my.id/api/v1/error-logs", bodyError)
+                            await postData("https://devgoldendigital.my.id/api/error-logs", bodyError)
                         }
                     }else{
                         await sleep(10000)
@@ -522,7 +524,7 @@ function createClient(clientId) {
                 "function_name": "UserController@store",
                 "level": "error"
             }
-            await postData("https://devgoldendigital.my.id/api/v1/error-logs", bodyError)
+            await postData("https://devgoldendigital.my.id/api/error-logs", bodyError)
         }
          
 
@@ -535,35 +537,40 @@ function createClient(clientId) {
 const authFolder = path.join(__dirname, '.wwebjs_auth');
 
 // Auto-connect semua client yang sudah punya folder
-// function autoLoadClients() {
-//     if (!fs.existsSync(authFolder)) return;
+function autoLoadClients() {
+    if (!fs.existsSync(authFolder)) return;
 
-//     const clientIds = fs.readdirSync(authFolder).filter(name =>
-//         fs.statSync(path.join(authFolder, name)).isDirectory()
-//     );
+    const clientIds = fs.readdirSync(authFolder).filter(name =>
+        fs.statSync(path.join(authFolder, name)).isDirectory()
+    );
 
-//     clientIds.forEach(async clientId => {
-//         console.log(`Auto-loading client: ${clientId.split("-")[1]}`);
-//         try{
+    listBot.forEach(async clientId => {
+        console.log(`Auto-loading client: ${clientId.split("-")[1]}`);
+        try{
+            if(clientIds.includes(`session-${clientId}`)){
+                createClient(clientId);
+            }
+        }catch (e){
+            console.log(e);
+            const bodyError = {
+                "error_message": e.message,
+                "function_name": "UserController@store",
+                "level": "error"
+            }
+            await postData("https://devgoldendigital.my.id/api/error-logs", bodyError)
+        }
+    });
+}
 
-//             createClient(clientId.split("-")[1]);
-//         }catch (e){
-//             console.log(e);
-//             const bodyError = {
-//                 "error_message": e.message,
-//                 "function_name": "UserController@store",
-//                 "level": "error"
-//             }
-//             await postData("https://devgoldendigital.my.id/api/v1/error-logs", bodyError)
-//         }
-//     });
-// }
-
-// autoLoadClients(); // panggil saat server start
+autoLoadClients(); // panggil saat server start
 
 
 app.get('/qrcode/:clientId', (req, res) => {
     const clientId = req.params.clientId;
+
+    if(!listBot.includes(clientId)){
+        return res.send(`Maaf, client ${clientId} tidak diijinkan.`);
+    }
 
     // Cek apakah client sudah ada
     if (!clients[clientId]) {

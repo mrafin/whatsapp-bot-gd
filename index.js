@@ -535,31 +535,31 @@ function createClient(clientId) {
 const authFolder = path.join(__dirname, '.wwebjs_auth');
 
 // Auto-connect semua client yang sudah punya folder
-function autoLoadClients() {
-    if (!fs.existsSync(authFolder)) return;
+// function autoLoadClients() {
+//     if (!fs.existsSync(authFolder)) return;
 
-    const clientIds = fs.readdirSync(authFolder).filter(name =>
-        fs.statSync(path.join(authFolder, name)).isDirectory()
-    );
+//     const clientIds = fs.readdirSync(authFolder).filter(name =>
+//         fs.statSync(path.join(authFolder, name)).isDirectory()
+//     );
 
-    clientIds.forEach(async clientId => {
-        console.log(`Auto-loading client: ${clientId.split("-")[1]}`);
-        try{
+//     clientIds.forEach(async clientId => {
+//         console.log(`Auto-loading client: ${clientId.split("-")[1]}`);
+//         try{
 
-            createClient(clientId.split("-")[1]);
-        }catch (e){
-            console.log(e);
-            const bodyError = {
-                "error_message": e.message,
-                "function_name": "UserController@store",
-                "level": "error"
-            }
-            await postData("https://devgoldendigital.my.id/api/v1/error-logs", bodyError)
-        }
-    });
-}
+//             createClient(clientId.split("-")[1]);
+//         }catch (e){
+//             console.log(e);
+//             const bodyError = {
+//                 "error_message": e.message,
+//                 "function_name": "UserController@store",
+//                 "level": "error"
+//             }
+//             await postData("https://devgoldendigital.my.id/api/v1/error-logs", bodyError)
+//         }
+//     });
+// }
 
-autoLoadClients(); // panggil saat server start
+// autoLoadClients(); // panggil saat server start
 
 
 app.get('/qrcode/:clientId', (req, res) => {

@@ -13,7 +13,7 @@ const questionList = {
     
     
     "5":"Nama : {name}\nEmail: {email}\nMenu : {produk} \nApakah data diatas sudah benar?\n1. Sudah, lanjut pembayaran\n2. Belum, kembali ke Menu",
-    "6":"Total: Rp {price}\nSilahkan melakukan pembayaran pada Qris berikut:\n\n Apabila sudah transfer, mohon kirimkan bukti transfer. .",
+    "6":"Total: Rp {price}\nSilahkan melakukan pembayaran pada Qris berikut:\n\nMohon transfer sebelum 15 menit.\nApabila sudah transfer, mohon kirimkan bukti transfer.",
     "7":"Mohon selesaikan pembayaran dan tunggu sampai proses selesai.",
     "8":"1. Lanjut Transaksi\n\n0. Kembali ke Menu Utama",
     "9":"Apakah sudah memiliki kode transaksi dari Shopee?\n1. Sudah\n2. Belum, saya baru mau bertransaksi\n\n0 . Kembali ke Menu Utama",

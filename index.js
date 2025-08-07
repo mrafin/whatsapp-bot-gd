@@ -72,7 +72,7 @@ const lastChat = {};
 const onConv = new Set()
 const csSession = new Set()
 
-function isClaimFormatValid(teks) {
+async function isClaimFormatValid(teks) {
   const lines = teks.trim().split(/\r?\n/).map(line => line.trim());
 
   // Cari indeks baris yang berisi "Halo,"
@@ -180,7 +180,8 @@ function createClient(clientId) {
             console.log(3);
 
             try{
-                if(isClaimFormatValid(text)) {
+                const isValidClaimedFormat = await isClaimFormatValid(text)
+                if(isValidClaimedFormat) {
 
                     // const namaMatch = text.match(/nama\s*:\s*(\w+)/i);
                     // const emailMatch = text.match(/email\s*:\s*([\w.-]+@[\w.-]+\.\w+)/i);
@@ -931,19 +932,36 @@ app.listen(port, () => {
 
 cron.schedule('* * * * *', () => {
     console.log('Cron job berjalan setiap menit');
-    const treshHold = Date.now() - 5 * 60 * 1000;
-    const sessionTreshHold = Date.now() - 30 * 60 * 1000;
+    const treshHold = Date.now() - 1 * 60 * 1000;
+    const paymentTreshHold = Date.now() - 15 * 60 * 1000;
+    const sessionTreshHold = Date.now() - 2 * 60 * 1000;
     // Iterasi melalui session dan hapus key yang updated_at > 1 jam
     
-    for (const keys in session) {
-        for(const key in session[keys]){
+    for (const keys in lastChat) {
+        for(const key in lastChat[keys]){
             console.log(key);
+            console.log(lastChat[keys][key]);
             console.log(treshHold);
-            if (lastChat[keys][key] < treshHold) {
-                console.log(`Menghapus session: ${key}`);
-                delete session[keys][key];
-                onConv.delete(key)
-            }else if(lastChat[keys][key] < sessionTreshHold){
+            console.log(sessionTreshHold);
+            try{
+                if (lastChat[keys][key] < treshHold) {
+                    if(session[keys][key].question_id == "6"){
+                        if(lastChat[keys][key] < paymentTreshHold){
+                            console.log(`Menghapus session: ${key}`);
+                            delete session[keys][key];
+                            onConv.delete(key)    
+                        }
+                    }else{ 
+                        console.log(`Menghapus session: ${key}`);
+                        delete session[keys][key];
+                        onConv.delete(key)
+                    }
+                }
+            }catch{}
+            console.log("test cs: ", lastChat[keys][key] < sessionTreshHold);
+            
+            if(lastChat[keys][key] < sessionTreshHold){
+                console.log(`Menghapus CS session: ${key}`);
                 csSession.delete(key)
             }
         }

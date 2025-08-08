@@ -932,9 +932,9 @@ app.listen(port, () => {
 
 cron.schedule('* * * * *', () => {
     console.log('Cron job berjalan setiap menit');
-    const treshHold = Date.now() - 1 * 60 * 1000;
+    const treshHold = Date.now() - 5 * 60 * 1000;
     const paymentTreshHold = Date.now() - 15 * 60 * 1000;
-    const sessionTreshHold = Date.now() - 2 * 60 * 1000;
+    const sessionTreshHold = Date.now() - 30 * 60 * 1000;
     // Iterasi melalui session dan hapus key yang updated_at > 1 jam
     
     for (const keys in lastChat) {
